@@ -2,13 +2,19 @@
 
 This service will use the directory structure that is sampled in the `sample-data` dir. It will refit the classifier, and persist the fitted classifier in a persistent file. 
 
-# How to run
+# How to train the classifier
 ```bash
 pip3 install -r requirements.txt
 #rm -rf data
 cp -r sample-data data
 python3 main.py
 ```
+
+# How to use the trained classifier
+```bash
+python3 recognitionCmd.py ./data/images/barack/test-images/barack4.jpeg
+```
+
 
 # The process will do the following steps.
 
