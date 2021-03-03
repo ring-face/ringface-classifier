@@ -23,7 +23,13 @@ Phase 2: Fit the [Support Vector Classifier](https://scikit-learn.org/stable/mod
 * Load each file from the `encodings` folder into a numpy array
 * create the same sized array with the name of the persons, where `encodings[i]` represents the encoded face of `persons[i]`
 * run `newClassifier=SVC.fit(encodings, persons)`
-* test the `newModel` for quality
-* [persist](https://scikit-learn.org/stable/modules/model_persistence.html) the `newModel` to the `data/classifier` dir in as `classifier-timestamp.joblib` 
+* [persist](https://scikit-learn.org/stable/modules/model_persistence.html) the `newModel` to the `data/classifier` dir in as `fitting.timestamp` 
+
+Phase 3: Test the new model
+* loads the persisted classifier, and tests ist capabilities on the test set of the **/test-images folder
+* in addition to the classification, it calculates an euclidian distance from the encodings of the found person
+* only if the distance is below a treshold, is the classification valid
+* this avoids recognising arbitrary face as known person
+
 
 Once this is finished, the proces exits
