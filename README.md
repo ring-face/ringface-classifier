@@ -4,7 +4,8 @@ This service will use the directory structure that is sampled in the `sample-dat
 
 # How to run
 ```bash
-rm -rf data
+pip3 install -r requirements.txt
+#rm -rf data
 cp -r sample-data data
 python3 main.py
 ```
