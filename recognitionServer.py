@@ -3,6 +3,7 @@ import glob
 import os
 from joblib import load
 from PIL import Image
+import logging
 
 
 
@@ -34,7 +35,7 @@ def loadLatestClassifier():
     list_of_files = glob.glob('./data/classifier/*')
     latest_fitting = max(list_of_files, key=os.path.getctime)
 
-    print(f"Loading the classifier from {latest_fitting}")
+    logging.debug(f"Loading the classifier from {latest_fitting}")
     clf = load(latest_fitting)
 
     return clf

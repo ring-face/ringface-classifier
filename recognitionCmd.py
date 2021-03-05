@@ -2,6 +2,8 @@ import glob
 import os
 import sys
 import numpy as np
+import logging
+
 from joblib import load
 import face_recognition
 
@@ -12,7 +14,7 @@ from classifierRefit import helpers
 
 def recognition():
 
-    print ('Argument List:', str(sys.argv))
+    logging.debug(f"Argument List: {str(sys.argv)}")
     personImageFile = sys.argv[1]
 
     clf = loadLatestClassifier()
@@ -22,7 +24,7 @@ def recognition():
     # Find all the faces in the test image using the default HOG-based model
     face_locations = face_recognition.face_locations(imageNp)
     no = len(face_locations)
-    print("Number of faces detected: ", no)
+    logging.debug(f"Number of faces detected: {no}")
 
     # Predict all the faces in the test image using the trained classifier
     for i in range(no):
@@ -31,9 +33,9 @@ def recognition():
         encodingsDir="./data/images/" + name[0] + "/encodings"
 
         if isWithinTolerance(*name, encoding, encodingsDir):
-            print("Found:", *name)
+            logging.debug(f"Found: {name}")
         else: 
-            print(f"Unknown person in the image {personImageFile}")
+            logging.warning(f"Unknown person in the image {personImageFile}")
 
 
 
@@ -42,13 +44,13 @@ def loadLatestClassifier():
     list_of_files = glob.glob('./data/classifier/*')
     latest_fitting = max(list_of_files, key=os.path.getctime)
 
-    print(f"Loading the classifier from {latest_fitting}")
+    logging.debug(f"Loading the classifier from {latest_fitting}")
     clf = load(latest_fitting)
 
     return clf
 
 def isWithinTolerance(person, encoding, encodingsDir):
-    print(f"loading encodings of {person} from {encodingsDir}")
+    logging.debug(f"loading encodings of {person} from {encodingsDir}")
     known_face_encodings = helpers.loadPersonEncodings(encodingsDir)
 
     face_distances = face_recognition.face_distance(known_face_encodings, encoding)
@@ -58,5 +60,6 @@ def isWithinTolerance(person, encoding, encodingsDir):
         return True
 
 imageDir = "./data/images"
+logging.getLogger().setLevel(logging.DEBUG)
 
 recognition()

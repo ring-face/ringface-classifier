@@ -1,7 +1,4 @@
 nose
 sphinx
-os
-shutil
-face_recognintion
-json 
-time
+numpy
+face-recognition

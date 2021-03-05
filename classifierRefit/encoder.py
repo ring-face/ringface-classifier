@@ -2,9 +2,12 @@
 from . import helpers
 import os
 import shutil
+import json 
+import logging
+
 import face_recognition
 
-import json 
+
 
 
 
@@ -23,11 +26,11 @@ def processUnencoded(imageDir):
 
         if os.path.exists(newImagesdir):
 
-            print(f"encoding new faces of {personName} from dir {newImagesdir}")
+            logging.info(f"encoding new faces of {personName} from dir {newImagesdir}")
 
             for newPersonImage in os.listdir(newImagesdir):
 
-                print(f"processing {newPersonImage}")
+                logging.debug(f"processing {newPersonImage}")
                 try:
                     personImageFile = newImagesdir + "/" + newPersonImage
                     encoding = encodeImage(personImageFile)
@@ -36,16 +39,19 @@ def processUnencoded(imageDir):
 
                     moveFileTo(personImageFile, encodedImagesDir, "File processed")
                 except helpers.MultiFaceError as err:
-                    print(f"MultiFaceError on {newPersonImage}")
+                    logging.debug(f"MultiFaceError on {newPersonImage}")
                     moveFileTo(err.filename, ignoredImagesDir, "MultiFaceError")
                 except:
-                    print("Unexpected error:", sys.exc_info()[0])
+                    logging.error("Unexpected error:", sys.exc_info()[0])
 
         else:
-            print(f"ignoring person {personName}")
+            logging.warn(f"ignoring person {personName}")
 
 def encodeImage(personImageFile):
-    print(f"encodeImage {personImageFile}")
+    """
+    Takes an image file path as input, and returns the 128 long numpy array of encoding
+    """
+    logging.debug(f"encodeImage {personImageFile}")
 
     face = face_recognition.load_image_file(personImageFile)
     face_bounding_boxes = face_recognition.face_locations(face)
@@ -55,18 +61,18 @@ def encodeImage(personImageFile):
         face_encoding = face_recognition.face_encodings(face)[0]
         return face_encoding
     else:
-        print(f"{personImageFile} was skipped and can't be used for training")
+        logging.debug(f"{personImageFile} was skipped and can't be used for training")
         raise helpers.MultiFaceError(personImageFile)
 
 
 
 def persistEncoding(encoding, encodedingsDir, newPersonImage):
     encodingFile=encodedingsDir + "/" + newPersonImage + ".json"
-    print(f"saving the encoding to {encodingFile}")
+    logging.debug(f"saving the encoding to {encodingFile}")
 
     lists = encoding.tolist()
     json_str = json.dumps(lists)
-    # print(json_str)
+    # logging.debug(json_str)
 
     fileHandler = open(encodingFile, "w")
     fileHandler.write(json_str)

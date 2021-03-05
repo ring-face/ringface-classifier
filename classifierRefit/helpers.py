@@ -2,6 +2,8 @@ import os
 import sys
 import numpy as np
 import json
+import logging
+
 
 
 class Error(Exception):
@@ -26,7 +28,7 @@ def loadPersonEncodings(encodedingsDir):
         
         for encodingFileName in os.listdir(encodedingsDir):
             encodingFile = encodedingsDir + "/" + encodingFileName
-            print(f"Loading encoding {encodingFile}")
+            logging.debug(f"Loading encoding {encodingFile}")
             encoding = loadEncoding(encodingFile)
             encodings.append(encoding)
 
