@@ -5,7 +5,7 @@ import sys
 from recogniser.file import recognition
 
 imageDir = "./data/images"
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 if len(sys.argv) == 1:
     logging.error(f"usage: python {str(sys.argv[0])} /path/someimage.jpeg")

@@ -5,6 +5,7 @@ import numpy as np
 import logging
 import json
 import time
+import uuid
 import PIL.Image
 
 from joblib import load
@@ -14,7 +15,7 @@ from classifierRefit import helpers
 
 class TextInfo:
     def __init__(self):
-        personImageFile = ""
+        self.personImageFile = ""
 
 
 class FileRecognitionResult:
@@ -26,13 +27,16 @@ class FileRecognitionResult:
         
         self.unknownPersonsImage = [] # PIL.Image
 
+
     def addPerson(self, name):
         self.info.recognisedPersons.append(name)
 
     def addUnknownPersonImage(self, pilImage):
          self.unknownPersonsImage.append(pilImage)
+         filename = "face-" + uuid.uuid4().hex + ".jpeg"
+         self.info.unknownPersons.append(filename)
 
-         
+
         
 
     def json(self):
@@ -91,24 +95,23 @@ def isWithinTolerance(person, encoding, encodingsDir):
     known_face_encodings = helpers.loadPersonEncodings(encodingsDir)
 
     face_distances = face_recognition.face_distance(known_face_encodings, encoding)
-    if np.min(face_distances) > 0.6: # empirical tolerance
+    if np.min(face_distances) > 0.5: # empirical tolerance
         return False
     else:
         return True
 
 def saveResult(result, recogniserDir):
     resultJson = result.json()
-    logging.info(f"Saving result: {resultJson}")
-
     timestr = time.strftime("%Y%m%d-%H%M%S")
     resultDir = recogniserDir + f"/run-{timestr}"
+
+    logging.info(f"Saving result: {resultJson} to dir: {resultDir}")
+
     os.mkdir(resultDir)
 
     fileHandler = open(resultDir + "/data.json", "w")
     fileHandler.write(resultJson)
     fileHandler.close()
 
-    i = 1
-    for img in result.unknownPersonsImage:
-        img.save(resultDir + f"/unknownPerson-{i}.jpeg", "JPEG")
-        i = i + 1
+    for img, filename in zip(result.unknownPersonsImage, result.info.unknownPersons):
+        img.save(resultDir + "/" + filename, "JPEG")
