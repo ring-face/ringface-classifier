@@ -2,3 +2,5 @@ nose
 sphinx
 numpy
 face-recognition
+joblib
+sklearn
