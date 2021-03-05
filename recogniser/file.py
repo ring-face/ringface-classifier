@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import logging
 import json
+import time
 import PIL.Image
 
 from joblib import load
@@ -11,14 +12,31 @@ import face_recognition
 
 from classifierRefit import helpers
 
+class TextInfo:
+    def __init__(self):
+        personImageFile = ""
 
 
 class FileRecognitionResult:
     def __init__(self, file):
-        self.personImageFile = file
-        self.recognisedPersons = [] # strings
-        self.unknownPersons = [] # PIL.Image
+        self.info = TextInfo()
+        self.info.personImageFile = file
+        self.info.recognisedPersons = []
+        self.info.unknownPersons = []
+        
+        self.unknownPersonsImage = [] # PIL.Image
 
+    def addPerson(self, name):
+        self.info.recognisedPersons.append(name)
+
+    def addUnknownPersonImage(self, pilImage):
+         self.unknownPersonsImage.append(pilImage)
+
+         
+        
+
+    def json(self):
+        return json.dumps(self.info.__dict__)
 
 
 
@@ -27,12 +45,6 @@ def recognition(personImageFile, recogniserDir):
     result = FileRecognitionResult(personImageFile)
 
     clf = loadLatestClassifier()
-
-    # imageNp = face_recognition.load_image_file(personImageFile)
-
-    # image = PIL.Image.open(personImageFile)
-    # image = image.convert('RGB')
-    # imageNp = np.array(image)
 
     image = face_recognition.load_image_file(personImageFile)
 
@@ -50,14 +62,14 @@ def recognition(personImageFile, recogniserDir):
 
         if isWithinTolerance(*name, encoding, encodingsDir):
             logging.info(f"Recognised: {name}")
-            result.recognisedPersons.append(*name)
+            result.addPerson(name[0])
         else: 
             logging.info(f"Unknown person in the image {personImageFile}")
             top, right, bottom, left = face_locations[i]
             logging.debug("The unknown face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
             thumbnail = image[top:bottom, left:right]
             pilThumbnail = PIL.Image.fromarray(thumbnail)
-            # result.unknownPersons.append(pilThumbnail)
+            result.addUnknownPersonImage(pilThumbnail)
             if logging.getLogger().level == logging.DEBUG:
                 pilThumbnail.show()
             
@@ -85,5 +97,18 @@ def isWithinTolerance(person, encoding, encodingsDir):
         return True
 
 def saveResult(result, recogniserDir):
-    resultJson = json.dumps(result.__dict__)
+    resultJson = result.json()
     logging.info(f"Saving result: {resultJson}")
+
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    resultDir = recogniserDir + f"/run-{timestr}"
+    os.mkdir(resultDir)
+
+    fileHandler = open(resultDir + "/data.json", "w")
+    fileHandler.write(resultJson)
+    fileHandler.close()
+
+    i = 1
+    for img in result.unknownPersonsImage:
+        img.save(resultDir + f"/unknownPerson-{i}.jpeg", "JPEG")
+        i = i + 1
