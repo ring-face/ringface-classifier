@@ -7,16 +7,10 @@ This service will use the directory structure that is sampled in the `sample-dat
 pip3 install -r requirements.txt
 #rm -rf data
 cp -r sample-data data
-python3 main.py
+python3 startClassifier.py
 ```
 
-# How to use the trained classifier
-```bash
-python3 recognitionCmd.py ./data/images/barack/test-images/barack4.jpeg
-```
-
-
-# The process will do the following steps.
+# The training process will do the following steps.
 
 Phase 1: Encode the unencoded images
 * Encode images in the `new-images` dir and move the file to `encoded-images` dir
@@ -39,3 +33,15 @@ Phase 3: Test the new model
 
 
 Once this is finished, the proces exits
+
+# How to use the trained classifier on a file
+```bash
+python3 startRecogniserFile.py ./data/images/barack/test-images/barack4.jpeg
+```
+
+# The file recognition process will do the following
+* find all faces in the passed image
+* print the name of the recognised faces
+* create a thumbnail crop of the unrecognised face in a new file
+** this thumbnail can be labelled
+** and then the model can be retrained
