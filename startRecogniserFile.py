@@ -5,7 +5,7 @@ import sys
 from recogniser.file import recognition
 
 imageDir = "./data/images"
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 
 if len(sys.argv) == 1:
     logging.error(f"usage: python {str(sys.argv[0])} /path/someimage.jpeg")
@@ -14,4 +14,4 @@ if len(sys.argv) == 1:
 logging.debug(f"Argument List: {str(sys.argv)}")
 personImageFile = sys.argv[1]
 
-recognition(personImageFile)
+recognition(personImageFile, './data/recogniser')
