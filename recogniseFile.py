@@ -12,10 +12,9 @@ from classifierRefit import helpers
 
 
 
-def recognition():
+def recognition(personImageFile):
 
-    logging.debug(f"Argument List: {str(sys.argv)}")
-    personImageFile = sys.argv[1]
+    
 
     clf = loadLatestClassifier()
 
@@ -33,7 +32,7 @@ def recognition():
         encodingsDir="./data/images/" + name[0] + "/encodings"
 
         if isWithinTolerance(*name, encoding, encodingsDir):
-            logging.debug(f"Found: {name}")
+            logging.info(f"Recognised: {name}")
         else: 
             logging.warning(f"Unknown person in the image {personImageFile}")
 
@@ -60,6 +59,15 @@ def isWithinTolerance(person, encoding, encodingsDir):
         return True
 
 imageDir = "./data/images"
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
-recognition()
+if len(sys.argv) == 1:
+    logging.error(f"usage: python {str(sys.argv[0])} /path/someimage.jpeg")
+    sys.exit(1)
+
+logging.debug(f"Argument List: {str(sys.argv)}")
+personImageFile = sys.argv[1]
+
+
+
+recognition(personImageFile)
