@@ -82,6 +82,8 @@ def recognition(personImageFile, recogniserDir):
 
     saveResult(result, recogniserDir)
 
+    return result
+
 
 
 def isWithinTolerance(person, encoding, encodingsDir):

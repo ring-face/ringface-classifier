@@ -45,3 +45,18 @@ python3 startRecogniserFile.py ./data/images/barack/test-images/barack4.jpeg
 * create a thumbnail crop of the unrecognised face in a new file
 ** this thumbnail can be labelled
 ** and then the model can be retrained
+
+# The recognition server
+* loads the latest fitter setup at startup
+* takes one file as input
+* stores it in /tmm
+* recognises the persons, and returns a 200 plus structured response similar to
+```json
+{"personImageFile": "/tmp/barack4.jpeg", "recognisedPersons": ["michele", "barack"], "unknownPersons": []}
+```
+
+## To start the server 
+```bash
+./startServer.sh
+curl -F "file=@./data/images/barack/test-images/barack3.jpeg" http://localhost:5000/recognition/file
+```

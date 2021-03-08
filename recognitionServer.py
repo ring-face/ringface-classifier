@@ -1,41 +1,60 @@
-import flask
+from flask import Flask, flash, request, redirect, url_for, abort, jsonify
 import glob
 import os
 from joblib import load
 from PIL import Image
 import logging
 
+from werkzeug.utils import secure_filename
+
+from recogniser import file
+from classifierRefit import storage
+
+UPLOAD_FOLDER = '/tmp'
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
+
+clf = storage.loadLatestClassifier()
 
 
-app = flask.Flask(__name__)
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def hello():
     return 'Hello, World!'
 
-@app.route('/recognition', methods=["POST"])
-def recognition():
 
-    clf = loadLatestClassifier()
-
-    imageData = flask.request.get_data()
-
-    
-
-    image = Image.frombytes('RGB', (277,182), imageData, 'jpeg')
+@app.errorhandler(404)
+def resource_not_found(e):
+    return jsonify(error=str(e)), 404
 
 
+@app.route('/recognition/file', methods=["POST"])
+def recognitionFile():
+    fileName = saveToUploadFolder(request)
+        
+    logging.info(f"processing uploaded file {fileName}")
 
+    fileRecognitionResult = file.recognition(fileName, './data/recogniser')
 
-    return "{'person':'unknown'}"
+    return fileRecognitionResult.json()
 
-
-def loadLatestClassifier():
-    list_of_files = glob.glob('./data/classifier/*')
-    latest_fitting = max(list_of_files, key=os.path.getctime)
-
-    logging.debug(f"Loading the classifier from {latest_fitting}")
-    clf = load(latest_fitting)
-
-    return clf
+def saveToUploadFolder(request):
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        abort(404, description="No file part")
+    file = request.files['file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        abort(404, description="No file specified")
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filename)
+        return filename
