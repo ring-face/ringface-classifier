@@ -1,54 +1,21 @@
+import json
+import logging
 import os
 import sys
-import numpy as np
-import logging
-import json
 import time
 import uuid
-import PIL.Image
 
 import face_recognition
+import numpy as np
+import PIL.Image
+from classifierRefit import helpers, storage
 
-from . import helper
-from classifierRefit import storage
-
-from classifierRefit import helpers
-
-class TextInfo:
-    def __init__(self):
-        self.personImageFile = ""
-
-
-class FileRecognitionResult:
-    def __init__(self, file):
-        self.info = TextInfo()
-        self.info.personImageFile = file
-        self.info.recognisedPersons = []
-        self.info.unknownPersons = []
-        
-        self.unknownPersonsImage = [] # PIL.Image
-
-
-    def addPerson(self, name):
-        self.info.recognisedPersons.append(name)
-
-    def addUnknownPersonImage(self, pilImage):
-        self.unknownPersonsImage.append(pilImage)
-
-    def addUnknownPersonName(self, filename):
-        self.info.unknownPersons.append(filename)
-
-
-        
-
-    def json(self):
-        return json.dumps(self.info.__dict__)
-
+from . import commons
 
 
 def recognition(personImageFile, recogniserDir):
 
-    result = FileRecognitionResult(personImageFile)
+    result = commons.FileRecognitionResult(personImageFile)
 
     clf = storage.loadLatestClassifier()
 
@@ -104,7 +71,7 @@ def saveResult(result, recogniserDir):
     i = 0;
     for img in result.unknownPersonsImage:
         unknownPersonName = f"unknown-{i}"
-        helper.saveFaceToPerson(img, resultDir, unknownPersonName)
+        commons.saveFaceToPerson(img, resultDir, unknownPersonName)
         result.addUnknownPersonName(unknownPersonName)
         i =+ 1
 
