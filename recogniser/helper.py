@@ -12,7 +12,7 @@ def saveFaceToPerson(faceImage, resultDir, personName):
     personDir = f"{resultDir}/{personName}"
     newImagesDir = f"{personDir}/new-images"
 
-    if not os.path.isdir(personName):
+    if not os.path.isdir(personDir):
         os.mkdir(personDir)
         os.mkdir(newImagesDir)
 

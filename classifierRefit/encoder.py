@@ -4,6 +4,7 @@ import os
 import shutil
 import json 
 import logging
+import sys
 
 import face_recognition
 
@@ -66,8 +67,10 @@ def encodeImage(personImageFile):
 
 
 
-def persistEncoding(encoding, encodedingsDir, newPersonImage):
-    encodingFile=encodedingsDir + "/" + newPersonImage + ".json"
+def persistEncoding(encoding, encodingsDir, newPersonImage):
+    if not os.path.isdir(encodingsDir):
+        os.mkdir(encodingsDir)
+    encodingFile=encodingsDir + "/" + newPersonImage + ".json"
     logging.debug(f"saving the encoding to {encodingFile}")
 
     lists = encoding.tolist()
