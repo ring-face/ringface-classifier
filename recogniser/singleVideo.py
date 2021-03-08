@@ -1,28 +1,33 @@
 import logging
 import os
 import sys
+import time
+import json
 import cv2
 from multiprocessing import Pool
 import face_recognition
 import PIL.Image
 
-
-
 from classifierRefit import helpers, storage
-
 from . import commons
 
+
+EACH_FRAME=5
+MAX_FRAMES=100
+STOP_AFTER_EMPTY_FREAMES=30/EACH_FRAME
+MIN_TRUMBNAIL_SIZE_IN_PX=150
 
 class PersonData:
     def __init__(self):
         self.encodings = []
         self.images = []
-        self.recognisedPersons = []
 
 class VideoRecognitionData:
     def __init__(self, videoFile):
         self.persons = {}
         self.videoFile = videoFile
+        self.recognisedPersons = []
+
 
     def addToPerson(self, name, image, encoding):
         if name not in self.persons:
@@ -35,7 +40,7 @@ class VideoRecognitionData:
         return self.persons.keys
 
     def addRecognisedPerson(self, name):
-        self.addRecognisedPerson.append(name)
+        self.recognisedPersons.append(name)
 
     def findSimilarPerson(self, encoding):
         for name, personData in self.persons.items():
@@ -43,6 +48,17 @@ class VideoRecognitionData:
                 return name
 
         return None
+
+    def json(self):
+        export = {}
+        export['videoFile'] = self.videoFile
+        export['recognisedPersons'] = self.recognisedPersons
+        export['unknownPersons'] = []
+        for unknownPerson, personData in self.persons.items():
+            export['unknownPersons'].append({"name": unknownPerson, "images": len(personData.images)})
+
+        return json.dumps(export)
+
 
 
 def recognition(videoFile, recogniserDir):
@@ -56,15 +72,28 @@ def recognition(videoFile, recogniserDir):
 
     input_movie = cv2.VideoCapture(videoFile)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
+    logging.info(f"Total frames: {length}")
 
     frame_counter = 0
+    noFaceFrameCounter = 0
+
     while True:
+        
         frame_got, frame = input_movie.read()
         frame_counter += 1
         
         if not frame_got:
             break
         
+        if frame_counter > MAX_FRAMES:
+            logging.warn(f"will not process more than {MAX_FRAMES}")
+            break
+
+        if frame_counter % EACH_FRAME != 0:
+            logging.debug(f"skippping frame {frame_counter}")
+            continue
+
+
         logging.debug(f"recognition on frame {frame_counter}")
 
 
@@ -72,12 +101,23 @@ def recognition(videoFile, recogniserDir):
         image = frame[:, :, ::-1]
 
         face_locations = face_recognition.face_locations(image)
+        facesCount = len(face_locations)
+        logging.debug(f"Number of faces detected: {facesCount}")
+
+        # stop after couple of empty frames
+        if facesCount == 0:
+            noFaceFrameCounter += 1
+            if noFaceFrameCounter >= STOP_AFTER_EMPTY_FREAMES:
+                logging.warn(f"noFaceFrameCounter: {noFaceFrameCounter}. Stopping")
+                break
+            else:
+                continue
+
         encodings = face_recognition.face_encodings(image)
+        noFaceFrameCounter = 0
 
-        no = len(face_locations)
-        logging.debug(f"Number of faces detected: {no}")
 
-        for i in range(no):
+        for i in range(facesCount):
             encoding = encodings[i]
             name = clf.predict([encoding])
             encodingsDir="./data/images/" + name[0] + "/encodings"
@@ -86,6 +126,10 @@ def recognition(videoFile, recogniserDir):
                 logging.info(f"Recognised: {name}")
                 result.addRecognisedPerson(name[0])
             else: 
+                # do not process too small faces
+                if faceTooSmall(face_locations[i]):
+                    continue
+
                 top, right, bottom, left = face_locations[i]
                 logging.debug("The unknown face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
                 thumbnail = image[top:bottom, left:right]
@@ -104,8 +148,37 @@ def recognition(videoFile, recogniserDir):
                     result.addToPerson(newPersonName, pilThumbnail, encoding)
 
 
+    saveResult(result, recogniserDir)
+
+    return result
+
+def faceTooSmall(faceLocation):
+    top, right, bottom, left = faceLocation
+    if bottom - top < MIN_TRUMBNAIL_SIZE_IN_PX or right - left < MIN_TRUMBNAIL_SIZE_IN_PX:
+        logging.debug("Face too small")
+        return True
+    else:
+        return False
 
 
+def saveResult(result, recogniserDir):
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    resultDir = recogniserDir + f"/run-{timestr}"
+    os.mkdir(resultDir)
 
-    
+    for unknownPersonName, personData in result.persons.items():
+        for img in personData.images:
+            commons.saveFaceToPerson(img, resultDir, unknownPersonName)
+        
+
+    resultJson = result.json()
+
+
+    fileHandler = open(resultDir + "/data.json", "w")
+    fileHandler.write(resultJson)
+    fileHandler.close()
+
+    logging.info(f"Saved result: {resultJson} to dir: {resultDir}")
+
+
 
