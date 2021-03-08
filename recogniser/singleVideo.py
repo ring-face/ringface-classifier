@@ -26,7 +26,7 @@ class VideoRecognitionData:
     def __init__(self, videoFile):
         self.persons = {}
         self.videoFile = videoFile
-        self.recognisedPersons = []
+        self.recognisedPersons = set()
 
 
     def addToPerson(self, name, image, encoding):
@@ -40,7 +40,7 @@ class VideoRecognitionData:
         return self.persons.keys
 
     def addRecognisedPerson(self, name):
-        self.recognisedPersons.append(name)
+        self.recognisedPersons.add(name)
 
     def findSimilarPerson(self, encoding):
         for name, personData in self.persons.items():
@@ -52,7 +52,7 @@ class VideoRecognitionData:
     def json(self):
         export = {}
         export['videoFile'] = self.videoFile
-        export['recognisedPersons'] = self.recognisedPersons
+        export['recognisedPersons'] = list(self.recognisedPersons)
         export['unknownPersons'] = []
         for unknownPerson, personData in self.persons.items():
             export['unknownPersons'].append({"name": unknownPerson, "images": len(personData.images)})
@@ -128,6 +128,7 @@ def recognition(videoFile, recogniserDir):
             else: 
                 # do not process too small faces
                 if faceTooSmall(face_locations[i]):
+                    logging.debug("Face too small")
                     continue
 
                 top, right, bottom, left = face_locations[i]
@@ -155,7 +156,6 @@ def recognition(videoFile, recogniserDir):
 def faceTooSmall(faceLocation):
     top, right, bottom, left = faceLocation
     if bottom - top < MIN_TRUMBNAIL_SIZE_IN_PX or right - left < MIN_TRUMBNAIL_SIZE_IN_PX:
-        logging.debug("Face too small")
         return True
     else:
         return False
