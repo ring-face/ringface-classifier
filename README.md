@@ -58,5 +58,5 @@ python3 startRecogniserFile.py ./data/images/barack/test-images/barack4.jpeg
 ## To start the server 
 ```bash
 ./startServer.sh
-curl -F "file=@./data/images/barack/test-images/barack3.jpeg" http://localhost:5000/recognition/file
+curl -F "file=@./data/images/barack/test-images/barack3.jpeg" http://localhost:5000/recognition/singe-image
 ```

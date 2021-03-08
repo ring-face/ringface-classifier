@@ -34,7 +34,7 @@ def resource_not_found(e):
     return jsonify(error=str(e)), 404
 
 
-@app.route('/recognition/file', methods=["POST"])
+@app.route('/recognition/singe-image', methods=["POST"])
 def recognitionFile():
     fileName = saveToUploadFolder(request)
         
