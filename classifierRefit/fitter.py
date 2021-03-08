@@ -57,7 +57,8 @@ def fitEncodings(imagesDir, classifierDir):
             logging.warn(f"ignoring {encodedingsDir}")
 
     logging.debug(f"fitting {len(encodings)} encoded faces to {len(fitterData.persons)} persons")
-    clf = svm.SVC(gamma='scale')
+    clf = svm.LinearSVC()
+    # clf = svm.SVC(gamma='scale')
     clf.fit(encodings,encodingLabels)
     logging.debug(f"fitting finished")
 
