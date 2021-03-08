@@ -5,3 +5,4 @@ data
 venv-copy
 venv
 classifierRefit/__pycache__/
+recogniser/__pycache__/

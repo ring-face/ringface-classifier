@@ -11,6 +11,8 @@ import PIL.Image
 from joblib import load
 import face_recognition
 
+from . import helper
+
 from classifierRefit import helpers
 
 class TextInfo:
@@ -32,9 +34,10 @@ class FileRecognitionResult:
         self.info.recognisedPersons.append(name)
 
     def addUnknownPersonImage(self, pilImage):
-         self.unknownPersonsImage.append(pilImage)
-         filename = "face-" + uuid.uuid4().hex + ".jpeg"
-         self.info.unknownPersons.append(filename)
+        self.unknownPersonsImage.append(pilImage)
+
+    def addUnknownPersonName(self, filename):
+        self.info.unknownPersons.append(filename)
 
 
         
@@ -101,17 +104,24 @@ def isWithinTolerance(person, encoding, encodingsDir):
         return True
 
 def saveResult(result, recogniserDir):
-    resultJson = result.json()
     timestr = time.strftime("%Y%m%d-%H%M%S")
     resultDir = recogniserDir + f"/run-{timestr}"
-
-    logging.info(f"Saving result: {resultJson} to dir: {resultDir}")
-
     os.mkdir(resultDir)
+
+    i = 0;
+    for img in result.unknownPersonsImage:
+        unknownPersonName = f"unknown-{i}"
+        helper.saveFaceToPerson(img, resultDir, unknownPersonName)
+        result.addUnknownPersonName(unknownPersonName)
+        i =+ 1
+
+
+    resultJson = result.json()
+
 
     fileHandler = open(resultDir + "/data.json", "w")
     fileHandler.write(resultJson)
     fileHandler.close()
 
-    for img, filename in zip(result.unknownPersonsImage, result.info.unknownPersons):
-        img.save(resultDir + "/" + filename, "JPEG")
+    logging.info(f"Saved result: {resultJson} to dir: {resultDir}")
+
