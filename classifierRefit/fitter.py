@@ -3,9 +3,25 @@ import json
 import numpy as np
 import time
 import logging
+import json
 
 from sklearn import svm
-from joblib import dump
+
+from . import storage
+
+class FitterData:
+    def __init__(self):
+        self.persons = {}
+
+    def addPerson(self, person):
+        self.persons[person] = []
+
+    def addUsedEncoding(self, person, encodingFile):
+        self.persons[person].append(encodingFile); 
+
+    def json(self):
+        return json.dumps(self.__dict__)
+
 
 def fitEncodings(imagesDir, classifierDir):
     """
@@ -15,15 +31,16 @@ def fitEncodings(imagesDir, classifierDir):
     logging.info(f"processing the encodings in {imagesDir}")
 
     encodings = []
-    names = []
-    persons = []
+    encodingLabels = []
+
+    fitterData = FitterData()
 
     logging.debug("loading all encoding files into memory")
     for personName in os.listdir(imagesDir):
         encodedingsDir=imagesDir + "/" + personName + "/encodings"
 
         if os.path.exists(encodedingsDir):
-            persons.append(personName)
+            fitterData.addPerson(personName)
             
             for encodingFileName in os.listdir(encodedingsDir):
                 encodingFile = encodedingsDir + "/" + encodingFileName
@@ -31,22 +48,23 @@ def fitEncodings(imagesDir, classifierDir):
                 try:
                     encoding = loadEncoding(encodingFile)
                     encodings.append(encoding)
-                    names.append(personName)
+                    encodingLabels.append(personName)
+                    fitterData.addUsedEncoding(personName, encodingFile)
 
                 except:
                     logging.error("Unexpected error:", sys.exc_info()[0])
         else:
             logging.warn(f"ignoring {encodedingsDir}")
 
-    logging.debug(f"fitting {len(encodings)} encoded faces to {len(persons)} persons")
+    logging.debug(f"fitting {len(encodings)} encoded faces to {len(fitterData.persons)} persons")
     clf = svm.SVC(gamma='scale')
-    clf.fit(encodings,names)
+    clf.fit(encodings,encodingLabels)
     logging.debug(f"fitting finished")
 
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    clfFile = classifierDir + "/fitting." + timestr
-    logging.info(f"storing the fitted classifier to {clfFile}")
-    storeClassifier(clf, clfFile)
+
+    clfFile = storage.saveResult(clf, fitterData, classifierDir)
+
+    
 
     return clfFile
 
@@ -57,12 +75,5 @@ def loadEncoding(encodingFile):
         data = json.load(json_file)
         encoding = np.asarray(data)
         return encoding
-
-
-
-
-
-def storeClassifier(clf, clfFile):
-    dump(clf, clfFile) 
 
 

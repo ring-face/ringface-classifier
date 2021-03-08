@@ -1,4 +1,3 @@
-import glob
 import os
 import sys
 import numpy as np
@@ -8,10 +7,10 @@ import time
 import uuid
 import PIL.Image
 
-from joblib import load
 import face_recognition
 
 from . import helper
+from classifierRefit import storage
 
 from classifierRefit import helpers
 
@@ -51,7 +50,7 @@ def recognition(personImageFile, recogniserDir):
 
     result = FileRecognitionResult(personImageFile)
 
-    clf = loadLatestClassifier()
+    clf = storage.loadLatestClassifier()
 
     image = face_recognition.load_image_file(personImageFile)
 
@@ -84,14 +83,6 @@ def recognition(personImageFile, recogniserDir):
     saveResult(result, recogniserDir)
 
 
-def loadLatestClassifier():
-    list_of_files = glob.glob('./data/classifier/*')
-    latest_fitting = max(list_of_files, key=os.path.getctime)
-
-    logging.info(f"Loading the classifier from {latest_fitting}")
-    clf = load(latest_fitting)
-
-    return clf
 
 def isWithinTolerance(person, encoding, encodingsDir):
     logging.debug(f"loading encodings of {person} from {encodingsDir}")
