@@ -45,16 +45,16 @@ python3 startRecogniserSingleVideo.py ./sample-data/ring-sample-video.mp4
 * find all faces in the passed image
 * print the name of the recognised faces
 * create a thumbnail crop of the unrecognised face in a new file
-** this thumbnail can be labelled
-** and then the model can be retrained
+* this thumbnail can be labelled
+* and then the model can be retrained
 
 ## The video recognition process does the following
 * find all faces in the each frame
 * record the name of the recognised faces
 * create a thumbnail crop of the unrecognised face in a new file
 * compare this thubnail for similar faces, so the same person enters the same folder
-** this thumbnail can be labelled
-** and then the model can be retrained
+* this thumbnail can be labelled
+* and then the model can be retrained
 
 
 # The recognition server
