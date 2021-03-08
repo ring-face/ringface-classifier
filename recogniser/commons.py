@@ -1,7 +1,11 @@
 import json
 import os
 import uuid
+import logging
+import face_recognition
+import numpy as np
 
+from classifierRefit import helpers
 
 class TextInfo:
     def __init__(self):
@@ -51,3 +55,17 @@ def saveFaceToPerson(faceImage, resultDir, personName):
     faceImage.save(newImagesDir + "/" + filename, "JPEG")
 
     return filename
+
+
+def isWithinTolerance( encoding, encodingsDir):
+    logging.debug(f"loading encodings of from {encodingsDir}")
+    known_face_encodings = helpers.loadPersonEncodings(encodingsDir)
+
+    return isWithinToleranceToEncodings(encoding, known_face_encodings)
+
+def isWithinToleranceToEncodings(encoding, known_face_encodings):
+    face_distances = face_recognition.face_distance(known_face_encodings, encoding)
+    if np.min(face_distances) > 0.5: # empirical tolerance
+        return False
+    else:
+        return True

@@ -33,7 +33,7 @@ def recognition(personImageFile, recogniserDir):
         name = clf.predict([encoding])
         encodingsDir="./data/images/" + name[0] + "/encodings"
 
-        if isWithinTolerance(*name, encoding, encodingsDir):
+        if commons.isWithinTolerance(encoding, encodingsDir):
             logging.info(f"Recognised: {name}")
             result.addPerson(name[0])
         else: 
@@ -53,15 +53,7 @@ def recognition(personImageFile, recogniserDir):
 
 
 
-def isWithinTolerance(person, encoding, encodingsDir):
-    logging.debug(f"loading encodings of {person} from {encodingsDir}")
-    known_face_encodings = helpers.loadPersonEncodings(encodingsDir)
 
-    face_distances = face_recognition.face_distance(known_face_encodings, encoding)
-    if np.min(face_distances) > 0.5: # empirical tolerance
-        return False
-    else:
-        return True
 
 def saveResult(result, recogniserDir):
     timestr = time.strftime("%Y%m%d-%H%M%S")
