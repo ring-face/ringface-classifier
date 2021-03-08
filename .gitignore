@@ -4,7 +4,9 @@ data
 .git-old
 venv-copy
 venv
+
 classifierRefit/__pycache__/
 recogniser/__pycache__/
-__pycache__/
+
 sample-data/dora-reka.mp4
+__pycache__/**

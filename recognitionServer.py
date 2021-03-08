@@ -7,11 +7,11 @@ import logging
 
 from werkzeug.utils import secure_filename
 
-from recogniser import singleImage
+from recogniser import singleImage, singleVideo
 from classifierRefit import storage
 
 UPLOAD_FOLDER = '/tmp'
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'mp4'}
 
 clf = storage.loadLatestClassifier()
 
@@ -33,12 +33,21 @@ def hello():
 def resource_not_found(e):
     return jsonify(error=str(e)), 404
 
-
-@app.route('/recognition/singe-image', methods=["POST"])
-def recognitionFile():
+@app.route('/recognition/singe-video', methods=["POST"])
+def recognitionVideo():
     fileName = saveToUploadFolder(request)
         
-    logging.info(f"processing uploaded file {fileName}")
+    logging.info(f"processing uploaded video {fileName}")
+
+    videoRecognitionResult = singleVideo.recognition(fileName, './data/recogniser')
+
+    return videoRecognitionResult.json()
+
+@app.route('/recognition/singe-image', methods=["POST"])
+def recognitionImage():
+    fileName = saveToUploadFolder(request)
+        
+    logging.info(f"processing uploaded image {fileName}")
 
     fileRecognitionResult = singleImage.recognition(fileName, './data/recogniser')
 

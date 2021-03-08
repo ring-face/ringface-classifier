@@ -37,26 +37,44 @@ Once this is finished, the proces exits
 # How to use the trained classifier on a file
 ```bash
 python3 startRecogniserSingleImage.py ./data/images/barack/test-images/barack4.jpeg
+# you can download a sample video here: https://www.youtube.com/watch?v=4P-4PlwTcoE
+python3 startRecogniserSingleVideo.py ./sample-data/ring-sample-video.mp4
 ```
 
-# The file recognition process will do the following
+## The image recognition process does the following
 * find all faces in the passed image
 * print the name of the recognised faces
 * create a thumbnail crop of the unrecognised face in a new file
 ** this thumbnail can be labelled
 ** and then the model can be retrained
 
+## The video recognition process does the following
+* find all faces in the each frame
+* record the name of the recognised faces
+* create a thumbnail crop of the unrecognised face in a new file
+* compare this thubnail for similar faces, so the same person enters the same folder
+** this thumbnail can be labelled
+** and then the model can be retrained
+
+
 # The recognition server
 * loads the latest fitter setup at startup
 * takes one file as input
-* stores it in /tmm
-* recognises the persons, and returns a 200 plus structured response similar to
+* stores it in /tmp
+* recognises the persons, and returns a HTTP 200 plus structured response similar to
 ```json
+// image result
 {"personImageFile": "/tmp/barack4.jpeg", "recognisedPersons": ["michele", "barack"], "unknownPersons": []}
+// video result
+{"videoFile": "sample-data/test.mp4", "recognisedPersons": [], "unknownPersons": [{"name": "unknown-1", "images": 2}, {"name": "unknown-2", "images": 2}, {"name": "unknown-3", "images": 1}]}
 ```
 
 ## To start the server 
 ```bash
 ./startServer.sh
+# post image
 curl -F "file=@./data/images/barack/test-images/barack3.jpeg" http://localhost:5000/recognition/singe-image
+# post video
+curl -F "file=@./sample-data/test.mp4" http://localhost:5000/recognition/singe-video
+
 ```
