@@ -36,7 +36,7 @@ Once this is finished, the proces exits
 
 # How to use the trained classifier on a file
 ```bash
-python3 startRecogniserFile.py ./data/images/barack/test-images/barack4.jpeg
+python3 startRecogniserSingleImage.py ./data/images/barack/test-images/barack4.jpeg
 ```
 
 # The file recognition process will do the following
