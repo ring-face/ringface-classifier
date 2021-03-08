@@ -6,3 +6,4 @@ venv-copy
 venv
 classifierRefit/__pycache__/
 recogniser/__pycache__/
+__pycache__/

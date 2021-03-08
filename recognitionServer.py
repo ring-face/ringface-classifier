@@ -7,7 +7,7 @@ import logging
 
 from werkzeug.utils import secure_filename
 
-from recogniser import file
+from recogniser import singleImage
 from classifierRefit import storage
 
 UPLOAD_FOLDER = '/tmp'
@@ -40,7 +40,7 @@ def recognitionFile():
         
     logging.info(f"processing uploaded file {fileName}")
 
-    fileRecognitionResult = file.recognition(fileName, './data/recogniser')
+    fileRecognitionResult = singleImage.recognition(fileName, './data/recogniser')
 
     return fileRecognitionResult.json()
 
