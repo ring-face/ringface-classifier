@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "test with curl -v http://localhost:5000/recognition -X POST --data-binary data/images/barack/test-images/barack3.jpeg"
+echo "test with curl -F \"file=@./sample-data/images/barack/test-images/family.jpeg\" http://localhost:5000/recognition/singe-image"
 
 export FLASK_APP=recognitionServer
 export FLASK_ENV=development
