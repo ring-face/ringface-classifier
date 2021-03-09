@@ -2,6 +2,7 @@ FROM python:3.8.8-slim-buster
 
 WORKDIR /app
 
+# modified from https://github.com/ageitgey/face_recognition/blob/master/Dockerfile
 RUN apt-get -y update
 RUN apt-get install -y --fix-missing \
     build-essential \

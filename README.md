@@ -1,7 +1,15 @@
 # Docker
-To run and test the application as docker container
+To run and test the application as docker container from dockerhub
 ```bash
 docker run -p 5000:5000 --name ring-face abaxsoraszem/ring-face-recognition-server:latest
+```
+To build and use the `./data` folder as volume
+```bash
+docker-compose up
+```
+
+To test the running container
+```bash
 # test the reachability
 curl localhost:5000
 # run the classification
