@@ -19,12 +19,12 @@ def saveClassifier(clf, fitterData, classifierDir="./data/classifier"):
 
     dump(clf, clfFile) 
 
+    fitterData.fittedClassifierFile = clfFile
+
     jsonData = fitterData.json()
     fileHandler = open(jsonFile, "w")
     fileHandler.write(jsonData)
     fileHandler.close()
-
-    return clfFile
 
 
 """

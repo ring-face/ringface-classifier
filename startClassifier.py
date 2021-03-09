@@ -9,8 +9,9 @@ from ringFace.classifierRefit.qaTester import testClassifier
 def main(datadir):
     imageDir = datadir + "/images"
     processUnencoded(imageDir)
-    fittedClassifierFile = fitEncodings(imageDir, datadir + "/classifier")
-    testClassifier(fittedClassifierFile, imageDir)
+    fitterData = fitEncodings(imageDir, datadir + "/classifier")
+    testClassifier(fitterData.fittedClassifierFile, imageDir)
+    print(f"Result: {fitterData.json()}")
 
 logging.getLogger().setLevel(logging.INFO)
 main("./data")

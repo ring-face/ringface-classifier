@@ -13,6 +13,7 @@ from . import helpers
 class FitterData:
     def __init__(self):
         self.persons = {}
+        self.fittedClassifierFile = ""
 
     def addPerson(self, person):
         self.persons[person] = []
@@ -64,11 +65,11 @@ def fitEncodings(imagesDir, classifierDir):
     logging.debug(f"fitting finished")
 
 
-    clfFile = clfStorage.saveClassifier(clf, fitterData, classifierDir)
+    clfStorage.saveClassifier(clf, fitterData, classifierDir)
 
     
 
-    return clfFile
+    return fitterData
 
 
 
