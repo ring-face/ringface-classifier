@@ -87,6 +87,7 @@ def classifier():
     fitterData = fitEncodings(dirStructure.imagesDir, dirStructure.classifierDir)
     testClassifier(fitterData.fittedClassifierFile, dirStructure.imagesDir)
 
+    global clf
     clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
     return fitterData.json()
