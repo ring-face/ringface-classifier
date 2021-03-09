@@ -8,12 +8,12 @@ import logging
 from werkzeug.utils import secure_filename
 
 from recogniser import singleImage, singleVideo
-from ringFace.ringUtils import storage
+from ringFace.ringUtils import clfStorage
 
 UPLOAD_FOLDER = '/tmp'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'mp4'}
 
-clf = storage.loadLatestClassifier()
+clf = clfStorage.loadLatestClassifier()
 
 
 app = Flask(__name__)

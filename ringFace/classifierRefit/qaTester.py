@@ -5,6 +5,7 @@ import numpy as np
 import logging
 
 from . import helpers
+from ringFace.ringUtils import commons
 
 
 def testClassifier(clfFile, imageDir):
@@ -43,17 +44,7 @@ def testClassifier(clfFile, imageDir):
                 for i in range(no):
                     encoding = face_recognition.face_encodings(testImageNp)[i]
                     name = clf.predict([encoding])
-                    if isWithinTolerance(*name, encoding, encodingsDir):
+                    if commons.isWithinTolerance(encoding, encodingsDir):
                         logging.debug(f"Found: {name}")
                     else: 
                         logging.warn(f"Unknown person in the image {personImageFile}")
-
-def isWithinTolerance(person, encoding, encodingsDir):
-    logging.debug(f"loading encodings of {person} from {encodingsDir}")
-    known_face_encodings = helpers.loadPersonEncodings(encodingsDir)
-
-    face_distances = face_recognition.face_distance(known_face_encodings, encoding)
-    if np.min(face_distances) > 0.6: # empirical tolerance
-        return False
-    else:
-        return True

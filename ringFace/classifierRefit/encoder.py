@@ -8,6 +8,8 @@ import sys
 
 import face_recognition
 
+from ringFace.ringUtils import commons
+
 
 
 
@@ -36,12 +38,12 @@ def processUnencoded(imageDir):
                     personImageFile = newImagesdir + "/" + newPersonImage
                     encoding = encodeImage(personImageFile)
 
-                    persistEncoding(encoding, encodedingsDir, newPersonImage)
+                    commons.persistEncoding(encoding, encodedingsDir, newPersonImage)
 
-                    moveFileTo(personImageFile, encodedImagesDir, "File processed")
+                    commons.moveFileTo(personImageFile, encodedImagesDir, "File processed")
                 except helpers.MultiFaceError as err:
                     logging.debug(f"MultiFaceError on {newPersonImage}")
-                    moveFileTo(err.filename, ignoredImagesDir, "MultiFaceError")
+                    commons.moveFileTo(err.filename, ignoredImagesDir, "MultiFaceError")
                 except:
                     logging.error("Unexpected error:", sys.exc_info()[0])
 
@@ -67,24 +69,7 @@ def encodeImage(personImageFile):
 
 
 
-def persistEncoding(encoding, encodingsDir, newPersonImage):
-    if not os.path.isdir(encodingsDir):
-        os.mkdir(encodingsDir)
-    encodingFile=encodingsDir + "/" + newPersonImage + ".json"
-    logging.debug(f"saving the encoding to {encodingFile}")
-
-    lists = encoding.tolist()
-    json_str = json.dumps(lists)
-    # logging.debug(json_str)
-
-    fileHandler = open(encodingFile, "w")
-    fileHandler.write(json_str)
-    fileHandler.close()
 
 
-def moveFileTo(file, targetDir, comment=""):
-    print (f"{comment}: moving file {file} to {targetDir}")
-    if os.path.isdir(targetDir) == False:
-        os.makedirs(targetDir); 
-    shutil.move(file, targetDir)
+
 

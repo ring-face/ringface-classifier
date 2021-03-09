@@ -10,7 +10,7 @@ import numpy as np
 import PIL.Image
 from ringFace.classifierRefit import helpers
 
-from ringFace.ringUtils import commons, storage
+from ringFace.ringUtils import commons, clfStorage
 
 
 class TextInfo:
@@ -45,7 +45,7 @@ def recognition(personImageFile, recogniserDir):
 
     result = ImageRecognitionResult(personImageFile)
 
-    clf = storage.loadLatestClassifier()
+    clf = clfStorage.loadLatestClassifier()
 
     image = face_recognition.load_image_file(personImageFile)
 

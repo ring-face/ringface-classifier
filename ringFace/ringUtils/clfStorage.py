@@ -10,7 +10,7 @@ from joblib import load
 Stores the passed classifier (clf) into a binary file
 Stores the passed data (fitterData) into a json
 """
-def saveResult(clf, fitterData, classifierDir="./data/classifier"):
+def saveClassifier(clf, fitterData, classifierDir="./data/classifier"):
     timestr = time.strftime("%Y%m%d-%H%M%S")
     clfFile = f"{classifierDir}/fitting.{timestr}.dat"
     jsonFile = f"{classifierDir}/fitting.{timestr}.json"

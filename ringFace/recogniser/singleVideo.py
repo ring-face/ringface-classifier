@@ -10,7 +10,7 @@ import PIL.Image
 
 from ringFace.classifierRefit import helpers
 
-from ringFace.ringUtils import commons, storage
+from ringFace.ringUtils import commons, clfStorage
 
 
 EACH_FRAME=5
@@ -69,7 +69,7 @@ def recognition(videoFile, recogniserDir):
     logging.info(f"processing input video {videoFile}")
     result = VideoRecognitionData(videoFile)
 
-    clf = storage.loadLatestClassifier()
+    clf = clfStorage.loadLatestClassifier()
 
     input_movie = cv2.VideoCapture(videoFile)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
