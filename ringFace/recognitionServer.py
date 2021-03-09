@@ -26,7 +26,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 logging.getLogger().setLevel(logging.INFO)
-
+logging.info("Server started")
 
 
 def allowed_file(filename):

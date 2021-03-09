@@ -4,3 +4,5 @@ numpy
 face-recognition
 joblib
 sklearn
+opencv-python
+flask

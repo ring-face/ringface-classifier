@@ -1,0 +1,14 @@
+{
+  "persons": {
+    "donald": [
+      "./data/images/donald/encodings/donald2.jpeg.json",
+      "./data/images/donald/encodings/donald1.jpeg.json"
+    ],
+     "barack": [
+      "./data/images/barack/encodings/barack2.jpeg.json",
+      "./data/images/barack/encodings/face-3035c78851034ebd9bd6c088b3e70254.jpeg.json",
+      "./data/images/barack/encodings/barack1.jpeg.json"
+    ]
+  },
+  "fittedClassifierFile": "./data/classifier/fitting.20210309-114318.dat"
+}
