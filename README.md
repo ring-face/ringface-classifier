@@ -1,3 +1,17 @@
+# Docker
+To run and test the application as docker container
+```bash
+docker run -p 5000:5000 --name ring-face abaxsoraszem/ring-face-recognition-server:latest
+# test the reachability
+curl localhost:5000
+# run the classification
+curl localhost:5000/classifier/run
+# recognise image
+curl -F "file=@./sample-data/images/barack/test-images/family.jpeg" http://localhost:5000/recognition/singe-image
+# recognise video
+curl -F "file=@./sample-data/somevideo.mp4" http://localhost:5000/recognition/singe-video
+```
+
 # This is the repo for the classifier retrain service
 
 This service will use the directory structure that is sampled in the `sample-data` dir. It will refit the classifier, and persist the fitted classifier in a persistent file. 

@@ -36,6 +36,6 @@ COPY ringFace ringFace
 COPY sample-data data
 
 
-COPY startServer.sh .
+COPY startServerProd.sh .
 
-CMD ./startServer.sh
+CMD ./startServerProd.sh
