@@ -5,7 +5,7 @@ import logging
 import face_recognition
 import numpy as np
 
-from classifierRefit import helpers
+from ringFace.classifierRefit import helpers
 
 
         

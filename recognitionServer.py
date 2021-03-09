@@ -8,7 +8,7 @@ import logging
 from werkzeug.utils import secure_filename
 
 from recogniser import singleImage, singleVideo
-from classifierRefit import storage
+from ringFace.ringUtils import storage
 
 UPLOAD_FOLDER = '/tmp'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'mp4'}

@@ -2,9 +2,9 @@
 
 import logging
 
-from classifierRefit.encoder import processUnencoded
-from classifierRefit.fitter import fitEncodings
-from classifierRefit.qaTester import testClassifier
+from ringFace.classifierRefit.encoder import processUnencoded
+from ringFace.classifierRefit.fitter import fitEncodings
+from ringFace.classifierRefit.qaTester import testClassifier
 
 def main(datadir):
     imageDir = datadir + "/images"

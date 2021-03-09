@@ -7,7 +7,8 @@ import json
 
 from sklearn import svm
 
-from . import storage
+from ringFace.ringUtils import storage
+from . import helpers
 
 class FitterData:
     def __init__(self):
@@ -46,7 +47,7 @@ def fitEncodings(imagesDir, classifierDir):
                 encodingFile = encodedingsDir + "/" + encodingFileName
                 logging.debug(f"Loading encoding {encodingFile}")
                 try:
-                    encoding = loadEncoding(encodingFile)
+                    encoding = helpers.loadEncoding(encodingFile)
                     encodings.append(encoding)
                     encodingLabels.append(personName)
                     fitterData.addUsedEncoding(personName, encodingFile)
@@ -69,12 +70,5 @@ def fitEncodings(imagesDir, classifierDir):
 
     return clfFile
 
-
-def loadEncoding(encodingFile):
-
-    with open(encodingFile) as json_file:
-        data = json.load(json_file)
-        encoding = np.asarray(data)
-        return encoding
 
 

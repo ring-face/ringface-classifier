@@ -8,9 +8,9 @@ from multiprocessing import Pool
 import face_recognition
 import PIL.Image
 
-from classifierRefit import helpers, storage
+from ringFace.classifierRefit import helpers
 
-from ringFace.ringUtils import commons
+from ringFace.ringUtils import commons, storage
 
 
 EACH_FRAME=5

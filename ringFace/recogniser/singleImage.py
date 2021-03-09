@@ -8,9 +8,9 @@ import uuid
 import face_recognition
 import numpy as np
 import PIL.Image
-from classifierRefit import helpers, storage
+from ringFace.classifierRefit import helpers
 
-from ringFace.ringUtils import commons
+from ringFace.ringUtils import commons, storage
 
 
 class TextInfo:
