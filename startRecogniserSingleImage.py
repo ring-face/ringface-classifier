@@ -2,7 +2,7 @@
 
 import logging
 import sys
-from recogniser.singleImage import recognition
+from ringFace.recogniser.singleImage import recognition
 
 imageDir = "./data/images"
 logging.getLogger().setLevel(logging.INFO)
