@@ -7,7 +7,7 @@ import logging
 
 from werkzeug.utils import secure_filename
 
-from recogniser import singleImage, singleVideo
+from ringFace.recogniser import singleImage, singleVideo
 from ringFace.ringUtils import clfStorage
 
 UPLOAD_FOLDER = '/tmp'
@@ -18,6 +18,9 @@ clf = clfStorage.loadLatestClassifier()
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+logging.getLogger().setLevel(logging.INFO)
+
 
 
 def allowed_file(filename):

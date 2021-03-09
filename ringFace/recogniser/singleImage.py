@@ -88,12 +88,12 @@ def saveResult(result, recogniserDir):
     resultDir = recogniserDir + f"/run-{timestr}"
     os.mkdir(resultDir)
 
-    i = 0;
+    i = 1;
     for img in result.unknownPersonsImage:
         unknownPersonName = f"unknown-{i}"
         commons.saveFaceToPerson(img, resultDir, unknownPersonName)
         result.addUnknownPersonName(unknownPersonName)
-        i =+ 1
+        i += 1
 
 
     resultJson = result.json()

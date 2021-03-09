@@ -141,12 +141,12 @@ def recognition(videoFile, recogniserDir):
 
                 similarPerson = result.findSimilarPerson(encoding)
                 if similarPerson is not None:
-                    logging.debug(f"{similarPerson} in the frame")
+                    logging.debug(f"{similarPerson} in the frame {frame_counter}")
                     result.addToPerson(similarPerson, pilThumbnail, encoding)
                 else: 
                     newPersonName = f"unknown-{personCounter}"
                     personCounter += 1
-                    logging.info(f"New {newPersonName} in the frame")
+                    logging.info(f"New {newPersonName} in the frame {frame_counter}")
                     result.addToPerson(newPersonName, pilThumbnail, encoding)
 
 

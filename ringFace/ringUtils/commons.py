@@ -4,6 +4,7 @@ import uuid
 import logging
 import face_recognition
 import numpy as np
+import shutil
 
 from ringFace.classifierRefit import helpers
 
