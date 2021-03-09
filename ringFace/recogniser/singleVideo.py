@@ -11,6 +11,8 @@ import PIL.Image
 from ringFace.classifierRefit import helpers
 
 from ringFace.ringUtils import commons, clfStorage
+from ringFace.ringUtils.dirStructure import DEFAULT_DIR_STUCTURE
+
 
 
 EACH_FRAME=5
@@ -62,7 +64,7 @@ class VideoRecognitionData:
 
 
 
-def recognition(videoFile, recogniserDir, clf = None):
+def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None):
 
     personCounter = 1
 
@@ -70,7 +72,7 @@ def recognition(videoFile, recogniserDir, clf = None):
     result = VideoRecognitionData(videoFile)
 
     if clf is None:
-        clf = clfStorage.loadLatestClassifier()
+        clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
     input_movie = cv2.VideoCapture(videoFile)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -122,7 +124,7 @@ def recognition(videoFile, recogniserDir, clf = None):
         for i in range(facesCount):
             encoding = encodings[i]
             name = clf.predict([encoding])
-            encodingsDir="./data/images/" + name[0] + "/encodings"
+            encodingsDir=dirStructure.imagesDir + "/" + name[0] + "/encodings"
 
             if commons.isWithinTolerance(encoding, encodingsDir):
                 logging.info(f"Recognised: {name} in frame {frame_counter}")
@@ -151,7 +153,7 @@ def recognition(videoFile, recogniserDir, clf = None):
                     result.addToPerson(newPersonName, pilThumbnail, encoding)
 
 
-    saveResult(result, recogniserDir)
+    saveResult(result, dirStructure.recogniserDir)
 
     return result
 

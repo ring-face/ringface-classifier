@@ -8,7 +8,7 @@ import logging
 from werkzeug.utils import secure_filename
 
 from ringFace.recogniser import singleImage, singleVideo
-from ringFace.ringUtils import clfStorage
+from ringFace.ringUtils import clfStorage, dirStructure
 
 from ringFace.classifierRefit.encoder import processUnencoded
 from ringFace.classifierRefit.fitter import fitEncodings
@@ -16,13 +16,11 @@ from ringFace.classifierRefit.qaTester import testClassifier
 
 
 UPLOAD_FOLDER = '/tmp'
-DATA_DIR = './data'
-IMAGES_DIR      = DATA_DIR + "/images"
-CLASSIFIER_DIR  = DATA_DIR + "/classifier"
-RECOGNISER_DIR  = DATA_DIR + '/recogniser'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'mp4'}
 
-clf = clfStorage.loadLatestClassifier()
+dirStructure = dirStructure.DEFAULT_DIR_STUCTURE
+
+clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -50,7 +48,7 @@ def recognitionVideo():
         
     logging.info(f"processing uploaded video {fileName}")
 
-    videoRecognitionResult = singleVideo.recognition(fileName, RECOGNISER_DIR, clf)
+    videoRecognitionResult = singleVideo.recognition(fileName, dirStructure, clf)
 
     return videoRecognitionResult.json()
 
@@ -60,7 +58,7 @@ def recognitionImage():
         
     logging.info(f"processing uploaded image {fileName}")
 
-    fileRecognitionResult = singleImage.recognition(fileName, RECOGNISER_DIR, clf)
+    fileRecognitionResult = singleImage.recognition(fileName, dirStructure, clf)
 
     return fileRecognitionResult.json()
 
@@ -85,11 +83,10 @@ def classifier():
         
     logging.info(f"Rerunning the classifier")
 
-    processUnencoded(IMAGES_DIR)
-    fitterData = fitEncodings(IMAGES_DIR, CLASSIFIER_DIR)
-    testClassifier(fitterData.fittedClassifierFile, IMAGES_DIR)
-    print(f"Result: {fitterData.json()}")
+    processUnencoded(dirStructure.imagesDir)
+    fitterData = fitEncodings(dirStructure.imagesDir, dirStructure.classifierDir)
+    testClassifier(fitterData.fittedClassifierFile, dirStructure.imagesDir)
 
-    clf = clfStorage.loadLatestClassifier()
+    clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
     return fitterData.json()

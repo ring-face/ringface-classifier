@@ -11,6 +11,8 @@ import PIL.Image
 from ringFace.classifierRefit import helpers
 
 from ringFace.ringUtils import commons, clfStorage
+from ringFace.ringUtils.dirStructure import DEFAULT_DIR_STUCTURE
+
 
 
 class TextInfo:
@@ -41,12 +43,12 @@ class ImageRecognitionResult:
         return json.dumps(self.info.__dict__)
 
 
-def recognition(personImageFile, recogniserDir, clf = None):
+def recognition(personImageFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None):
 
     result = ImageRecognitionResult(personImageFile)
 
     if clf is None:
-        clf = clfStorage.loadLatestClassifier()
+        clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
     image = face_recognition.load_image_file(personImageFile)
 
@@ -60,7 +62,7 @@ def recognition(personImageFile, recogniserDir, clf = None):
     for i in range(no):
         encoding = encodings[i]
         name = clf.predict([encoding])
-        encodingsDir="./data/images/" + name[0] + "/encodings"
+        encodingsDir=dirStructure.imagesDir + "/" + name[0] + "/encodings"
 
         if commons.isWithinTolerance(encoding, encodingsDir):
             logging.info(f"Recognised: {name}")
@@ -76,7 +78,7 @@ def recognition(personImageFile, recogniserDir, clf = None):
                 pilThumbnail.show()
             
 
-    saveResult(result, recogniserDir)
+    saveResult(result, dirStructure.recogniserDir)
 
     return result
 

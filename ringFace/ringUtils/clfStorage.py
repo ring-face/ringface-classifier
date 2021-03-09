@@ -10,7 +10,7 @@ from joblib import load
 Stores the passed classifier (clf) into a binary file
 Stores the passed data (fitterData) into a json
 """
-def saveClassifier(clf, fitterData, classifierDir="./data/classifier"):
+def saveClassifier(clf, fitterData, classifierDir):
     timestr = time.strftime("%Y%m%d-%H%M%S")
     clfFile = f"{classifierDir}/fitting.{timestr}.dat"
     jsonFile = f"{classifierDir}/fitting.{timestr}.json"
@@ -31,7 +31,7 @@ def saveClassifier(clf, fitterData, classifierDir="./data/classifier"):
 Loads the latest *.dat file from the passed or standard classifier dir
 Returns a sklearn.svm.SVC instance
 """
-def loadLatestClassifier(classifierDir="./data/classifier"):
+def loadLatestClassifier(classifierDir):
     list_of_files = glob.glob(f"{classifierDir}/*.dat")
     latest_fitting = max(list_of_files, key=os.path.getctime)
 

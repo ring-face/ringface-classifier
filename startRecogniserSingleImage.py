@@ -4,7 +4,6 @@ import logging
 import sys
 from ringFace.recogniser.singleImage import recognition
 
-imageDir = "./data/images"
 logging.getLogger().setLevel(logging.INFO)
 
 if len(sys.argv) == 1:
@@ -14,4 +13,4 @@ if len(sys.argv) == 1:
 logging.debug(f"Argument List: {str(sys.argv)}")
 personImageFile = sys.argv[1]
 
-recognition(personImageFile, './data/recogniser')
+recognition(personImageFile)

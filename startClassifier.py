@@ -6,12 +6,14 @@ from ringFace.classifierRefit.encoder import processUnencoded
 from ringFace.classifierRefit.fitter import fitEncodings
 from ringFace.classifierRefit.qaTester import testClassifier
 
-def main(datadir):
-    imageDir = datadir + "/images"
-    processUnencoded(imageDir)
-    fitterData = fitEncodings(imageDir, datadir + "/classifier")
-    testClassifier(fitterData.fittedClassifierFile, imageDir)
-    print(f"Result: {fitterData.json()}")
+from ringFace.ringUtils.dirStructure import DEFAULT_DIR_STUCTURE
+
+
 
 logging.getLogger().setLevel(logging.INFO)
-main("./data")
+
+processUnencoded(DEFAULT_DIR_STUCTURE.imagesDir)
+fitterData = fitEncodings(DEFAULT_DIR_STUCTURE.imagesDir, DEFAULT_DIR_STUCTURE.classifierDir)
+testClassifier(fitterData.fittedClassifierFile, DEFAULT_DIR_STUCTURE.imagesDir)
+
+print(f"Result: {fitterData.json()}")
