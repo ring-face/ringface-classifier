@@ -62,14 +62,15 @@ class VideoRecognitionData:
 
 
 
-def recognition(videoFile, recogniserDir):
+def recognition(videoFile, recogniserDir, clf = None):
 
     personCounter = 1
 
     logging.info(f"processing input video {videoFile}")
     result = VideoRecognitionData(videoFile)
 
-    clf = clfStorage.loadLatestClassifier()
+    if clf is None:
+        clf = clfStorage.loadLatestClassifier()
 
     input_movie = cv2.VideoCapture(videoFile)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))

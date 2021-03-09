@@ -10,11 +10,19 @@ from werkzeug.utils import secure_filename
 from ringFace.recogniser import singleImage, singleVideo
 from ringFace.ringUtils import clfStorage
 
+from ringFace.classifierRefit.encoder import processUnencoded
+from ringFace.classifierRefit.fitter import fitEncodings
+from ringFace.classifierRefit.qaTester import testClassifier
+
+
 UPLOAD_FOLDER = '/tmp'
+DATA_DIR = './data'
+IMAGES_DIR      = DATA_DIR + "/images"
+CLASSIFIER_DIR  = DATA_DIR + "/classifier"
+RECOGNISER_DIR  = DATA_DIR + '/recogniser'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'mp4'}
 
 clf = clfStorage.loadLatestClassifier()
-
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -29,7 +37,7 @@ def allowed_file(filename):
 
 @app.route('/')
 def hello():
-    return 'Hello, World!'
+    return 'Pong'
 
 
 @app.errorhandler(404)
@@ -42,7 +50,7 @@ def recognitionVideo():
         
     logging.info(f"processing uploaded video {fileName}")
 
-    videoRecognitionResult = singleVideo.recognition(fileName, './data/recogniser')
+    videoRecognitionResult = singleVideo.recognition(fileName, RECOGNISER_DIR, clf)
 
     return videoRecognitionResult.json()
 
@@ -52,7 +60,7 @@ def recognitionImage():
         
     logging.info(f"processing uploaded image {fileName}")
 
-    fileRecognitionResult = singleImage.recognition(fileName, './data/recogniser')
+    fileRecognitionResult = singleImage.recognition(fileName, RECOGNISER_DIR, clf)
 
     return fileRecognitionResult.json()
 
@@ -70,3 +78,18 @@ def saveToUploadFolder(request):
         filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filename)
         return filename
+
+
+@app.route('/classifier/run')
+def classifier():
+        
+    logging.info(f"Rerunning the classifier")
+
+    processUnencoded(IMAGES_DIR)
+    fitterData = fitEncodings(IMAGES_DIR, CLASSIFIER_DIR)
+    testClassifier(fitterData.fittedClassifierFile, IMAGES_DIR)
+    print(f"Result: {fitterData.json()}")
+
+    clf = clfStorage.loadLatestClassifier()
+
+    return fitterData.json()

@@ -41,11 +41,12 @@ class ImageRecognitionResult:
         return json.dumps(self.info.__dict__)
 
 
-def recognition(personImageFile, recogniserDir):
+def recognition(personImageFile, recogniserDir, clf = None):
 
     result = ImageRecognitionResult(personImageFile)
 
-    clf = clfStorage.loadLatestClassifier()
+    if clf is None:
+        clf = clfStorage.loadLatestClassifier()
 
     image = face_recognition.load_image_file(personImageFile)
 
