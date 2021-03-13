@@ -4,4 +4,4 @@ echo "test with curl -F \"file=@./sample-data/images/barack/test-images/family.j
 
 export FLASK_APP=ringFace.recognitionServer
 export FLASK_ENV=development
-flask run --host=0.0.0.0
+flask run --host=0.0.0.0 --port 5001

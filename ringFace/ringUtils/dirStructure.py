@@ -11,4 +11,8 @@ class DirStructure():
         self.recogniserDir = recogniserDir
         self.classifierDir = classifierDir
 
+        self.unprocessedEvents = dataDir + "/events/unprocessed"
+        self.processedEvents = dataDir + "/events/processed"
+
+
 DEFAULT_DIR_STUCTURE = DirStructure()

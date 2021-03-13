@@ -42,10 +42,23 @@ def hello():
 def resource_not_found(e):
     return jsonify(error=str(e)), 404
 
+@app.route('/recognition/local-video', methods=["POST"])
+def recognitionLocalVideo():
+    event = request.json
+    logging.info(f"will process event {event}")
+
+    videoFilePath = event['videoFileName']
+    
+    return videoRecognition(videoFilePath)
+
+
 @app.route('/recognition/singe-video', methods=["POST"])
 def recognitionVideo():
     fileName = saveToUploadFolder(request)
         
+    return videoRecognition(fileName)
+
+def videoRecognition(fileName):
     logging.info(f"processing uploaded video {fileName}")
 
     videoRecognitionResult = singleVideo.recognition(fileName, dirStructure, clf)
