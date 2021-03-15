@@ -211,7 +211,7 @@ def saveResultAsProcessedEvent(result, processedEventsDir, unprocessedEvent):
     resultJson = result.json()
 
 
-    fileHandler = open(resultDir + "/" + eventName + ".json", "w")
+    fileHandler = open(resultDir + "/processingResult.json", "w")
     fileHandler.write(resultJson)
     fileHandler.close()
 
