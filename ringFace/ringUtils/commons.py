@@ -27,10 +27,10 @@ def saveFaceToPerson(faceImage, resultDir, personName):
         os.mkdir(newImagesDir)
 
     filename = "face-" + uuid.uuid4().hex + ".jpeg"
+    filePath = newImagesDir + "/" + filename
+    faceImage.save(filePath, "JPEG")
 
-    faceImage.save(newImagesDir + "/" + filename, "JPEG")
-
-    return filename
+    return filePath
 
 
 """

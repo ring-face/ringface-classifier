@@ -24,12 +24,16 @@ class PersonData:
     def __init__(self):
         self.encodings = []
         self.images = []
+        self.imagePaths = []
 
 class VideoRecognitionData:
     def __init__(self, videoFile):
         self.persons = {}
         self.videoFile = videoFile
         self.recognisedPersons = set()
+
+    def addImageFilePathToPerson(self, filePath, personName):
+        self.persons[personName].imagePaths.append(filePath)
 
 
     def addToPerson(self, name, image, encoding):
@@ -58,13 +62,17 @@ class VideoRecognitionData:
         export['recognisedPersons'] = list(self.recognisedPersons)
         export['unknownPersons'] = []
         for unknownPerson, personData in self.persons.items():
-            export['unknownPersons'].append({"name": unknownPerson, "images": len(personData.images)})
+            export['unknownPersons'].append(
+                {"name": unknownPerson, 
+                "images": len(personData.images),
+                "imagePaths": personData.imagePaths
+            })
 
         return json.dumps(export)
 
 
 
-def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None):
+def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, unprocessedEvent= None, ):
 
     personCounter = 1
 
@@ -153,7 +161,9 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None):
                     result.addToPerson(newPersonName, pilThumbnail, encoding)
 
 
-    saveResult(result, dirStructure.recogniserDir)
+    saveResultAsRun(result, dirStructure.recogniserDir)
+    if unprocessedEvent is not None:
+        saveResultAsProcessedEvent(result, dirStructure.processedEvents, unprocessedEvent)
 
     return result
 
@@ -165,7 +175,7 @@ def faceTooSmall(faceLocation):
         return False
 
 
-def saveResult(result, recogniserDir):
+def saveResultAsRun(result, recogniserDir):
     timestr = time.strftime("%Y%m%d-%H%M%S")
     resultDir = recogniserDir + f"/run-{timestr}"
     os.mkdir(resultDir)
@@ -184,5 +194,27 @@ def saveResult(result, recogniserDir):
 
     logging.info(f"Saved result: {resultJson} to dir: {resultDir}")
 
+def saveResultAsProcessedEvent(result, processedEventsDir, unprocessedEvent):
+    logging.debug(f"saveResultAsProcessedEvent: {unprocessedEvent}")
+    eventName = unprocessedEvent['eventName']
+    resultDir = processedEventsDir + "/" + eventName
+    if os.path.isdir(resultDir):
+        logging.warning(f"Will replace content in {resultDir}")
+    else:
+        os.mkdir(resultDir)
+
+    for unknownPersonName, personData in result.persons.items():
+        for img in personData.images:
+            imageFilePath = imageFileName = commons.saveFaceToPerson(img, resultDir, unknownPersonName)
+            result.addImageFilePathToPerson(imageFilePath, unknownPersonName)
+
+    resultJson = result.json()
+
+
+    fileHandler = open(resultDir + "/" + eventName + ".json", "w")
+    fileHandler.write(resultJson)
+    fileHandler.close()
+
+    logging.info(f"Saved result: {resultJson} to dir: {resultDir}")
 
 

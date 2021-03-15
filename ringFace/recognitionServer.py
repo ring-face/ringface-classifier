@@ -49,21 +49,19 @@ def recognitionLocalVideo():
 
     videoFilePath = event['videoFileName']
     
-    return videoRecognition(videoFilePath)
+    videoRecognitionResult = singleVideo.recognition(videoFilePath, dirStructure, clf, event)
+
+    return videoRecognitionResult.json()
 
 
 @app.route('/recognition/singe-video', methods=["POST"])
 def recognitionVideo():
     fileName = saveToUploadFolder(request)
-        
-    return videoRecognition(fileName)
-
-def videoRecognition(fileName):
     logging.info(f"processing uploaded video {fileName}")
-
     videoRecognitionResult = singleVideo.recognition(fileName, dirStructure, clf)
-
     return videoRecognitionResult.json()
+
+
 
 @app.route('/recognition/singe-image', methods=["POST"])
 def recognitionImage():
