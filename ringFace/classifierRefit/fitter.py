@@ -12,6 +12,7 @@ from . import helpers
 
 class FitterData:
     def __init__(self):
+        self.name=time.strftime("%Y%m%d-%H%M%S")
         self.persons = {}
         self.fittedClassifierFile = ""
 

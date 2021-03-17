@@ -11,9 +11,8 @@ Stores the passed classifier (clf) into a binary file
 Stores the passed data (fitterData) into a json
 """
 def saveClassifier(clf, fitterData, classifierDir):
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    clfFile = f"{classifierDir}/fitting.{timestr}.dat"
-    jsonFile = f"{classifierDir}/fitting.{timestr}.json"
+    clfFile = f"{classifierDir}/fitting.{fitterData.name}.dat"
+    jsonFile = f"{classifierDir}/fitting.{fitterData.name}.json"
 
     logging.info(f"storing the fitted classifier to {jsonFile}")
 
