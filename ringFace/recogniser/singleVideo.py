@@ -4,6 +4,7 @@ import sys
 import time
 import json
 import cv2
+import uuid
 from multiprocessing import Pool
 import face_recognition
 import PIL.Image
@@ -15,10 +16,10 @@ from ringFace.ringUtils.dirStructure import DEFAULT_DIR_STUCTURE
 
 
 
-EACH_FRAME=5
+EACH_FRAME=3
 MAX_FRAMES=100
-STOP_AFTER_EMPTY_FREAMES=30/EACH_FRAME
-MIN_TRUMBNAIL_SIZE_IN_PX=150
+STOP_AFTER_EMPTY_FREAMES=5
+MIN_TRUMBNAIL_SIZE_IN_PX=120
 
 class PersonData:
     def __init__(self):
@@ -74,7 +75,7 @@ class VideoRecognitionData:
 
 
 
-def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ringEvent= None, ):
+def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ringEvent= None):
 
     personCounter = 1
 
@@ -133,82 +134,71 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ring
 
         for i in range(facesCount):
             encoding = encodings[i]
-            name = clf.predict([encoding])
-            encodingsDir=dirStructure.imagesDir + "/" + name[0] + "/encodings"
+            
+            #process the recognised face
+            if clf is not None:
+                name = clf.predict([encoding])
+                encodingsDir=dirStructure.imagesDir + "/" + name[0] + "/encodings"
 
-            if commons.isWithinTolerance(encoding, encodingsDir):
-                logging.info(f"Recognised: {name} in frame {frame_counter}")
-                result.addRecognisedPerson(name[0])
-            else: 
-                # do not process too small faces
-                if faceTooSmall(face_locations[i]):
-                    logging.debug("Face too small")
+                if commons.isWithinTolerance(encoding, encodingsDir):
+                    logging.info(f"Recognised: {name} in frame {frame_counter}")
+                    result.addRecognisedPerson(name[0])
                     continue
 
-                top, right, bottom, left = face_locations[i]
-                logging.debug("The unknown face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
-                thumbnail = image[top:bottom, left:right]
-                pilThumbnail = PIL.Image.fromarray(thumbnail)
-                if logging.getLogger().level == logging.DEBUG:
-                    pilThumbnail.show()
+            # unknown face processing
+            # do not process too small faces
+            if faceTooSmall(face_locations[i]):
+                continue
 
-                similarPerson = result.findSimilarPerson(encoding)
-                if similarPerson is not None:
-                    logging.debug(f"{similarPerson} in the frame {frame_counter}")
-                    result.addToPerson(similarPerson, pilThumbnail, encoding)
-                else: 
-                    newPersonName = f"unknown-{personCounter}"
-                    personCounter += 1
-                    logging.info(f"New {newPersonName} in the frame {frame_counter}")
-                    result.addToPerson(newPersonName, pilThumbnail, encoding)
+            top, right, bottom, left = face_locations[i]
+            logging.debug("The unknown face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
+            thumbnail = image[top:bottom, left:right]
+            pilThumbnail = PIL.Image.fromarray(thumbnail)
+            if logging.getLogger().level == logging.DEBUG:
+                pilThumbnail.show()
+
+            similarPerson = result.findSimilarPerson(encoding)
+            if similarPerson is not None:
+                logging.debug(f"{similarPerson} in the frame {frame_counter}")
+                result.addToPerson(similarPerson, pilThumbnail, encoding)
+            else: 
+                newPersonName = f"unknown-{personCounter}"
+                personCounter += 1
+                logging.info(f"New {newPersonName} in the frame {frame_counter}")
+                result.addToPerson(newPersonName, pilThumbnail, encoding)
 
 
-    saveResultAsRun(result, dirStructure.recogniserDir)
+    # saveResultAsRun(result, dirStructure.recogniserDir)
     if ringEvent is not None:
-        saveResultAsProcessedEvent(result, dirStructure.processedEvents, ringEvent)
+        saveResultAsProcessedEvent(result, dirStructure, ringEvent)
 
-    return result
+    return result.json()
 
 def faceTooSmall(faceLocation):
     top, right, bottom, left = faceLocation
     if bottom - top < MIN_TRUMBNAIL_SIZE_IN_PX or right - left < MIN_TRUMBNAIL_SIZE_IN_PX:
+        logging.debug(f"Face too small: {bottom - top} x {right - left}")
         return True
     else:
         return False
 
 
-def saveResultAsRun(result, recogniserDir):
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    resultDir = recogniserDir + f"/run-{timestr}"
-    os.mkdir(resultDir)
-
-    for unknownPersonName, personData in result.persons.items():
-        for img in personData.images:
-            commons.saveFaceToPerson(img, resultDir, unknownPersonName)
-        
-
-    resultJson = result.json()
-
-
-    fileHandler = open(resultDir + "/data.json", "w")
-    fileHandler.write(resultJson)
-    fileHandler.close()
-
-    logging.info(f"Saved result: {resultJson} to dir: {resultDir}")
-
-def saveResultAsProcessedEvent(result, processedEventsDir, ringEvent):
+def saveResultAsProcessedEvent(result, dirStructure, ringEvent):
     logging.debug(f"saveResultAsProcessedEvent: {ringEvent}")
     eventName = ringEvent['eventName']
     result.eventName = eventName
-    resultDir = processedEventsDir + "/" + eventName
+    resultDir = dirStructure.images + "/" + eventName
     if os.path.isdir(resultDir):
         logging.warning(f"Will replace content in {resultDir}")
     else:
         os.mkdir(resultDir)
 
     for unknownPersonName, personData in result.persons.items():
-        for img in personData.images:
-            imageFilePath = imageFileName = commons.saveFaceToPerson(img, resultDir, unknownPersonName)
+        for faceImage in personData.images:
+            filename = "face-" + uuid.uuid4().hex + ".jpeg"
+            imageFilePath = resultDir + "/" + filename
+            faceImage.save(imageFilePath, "JPEG")
+
             result.addImageFilePathToPerson(imageFilePath, unknownPersonName)
 
     resultJson = result.json()

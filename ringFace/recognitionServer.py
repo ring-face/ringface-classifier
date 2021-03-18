@@ -1,4 +1,4 @@
-from flask import Flask, flash, request, redirect, url_for, abort, jsonify
+from flask import Flask, flash, request, redirect, url_for, abort, jsonify, Response
 import glob
 import os
 from joblib import load
@@ -42,7 +42,7 @@ def hello():
 def resource_not_found(e):
     return jsonify(error=str(e)), 404
 
-@app.route('/recognition/local-video', methods=["POST"])
+@app.route('/recognition/local-video', methods=["POST"], )
 def recognitionLocalVideo():
     event = request.json
     logging.info(f"will process event {event}")
@@ -51,18 +51,22 @@ def recognitionLocalVideo():
     
     videoRecognitionResult = singleVideo.recognition(videoFilePath, dirStructure, clf, event)
 
-    return videoRecognitionResult.json()
+    return Response(videoRecognitionResult, mimetype='application/json')
 
-
+'''
+deprecated
+'''
 @app.route('/recognition/singe-video', methods=["POST"])
 def recognitionVideo():
     fileName = saveToUploadFolder(request)
     logging.info(f"processing uploaded video {fileName}")
     videoRecognitionResult = singleVideo.recognition(fileName, dirStructure, clf)
-    return videoRecognitionResult.json()
+    return videoRecognitionResult
 
 
-
+'''
+deprecated
+'''
 @app.route('/recognition/singe-image', methods=["POST"])
 def recognitionImage():
     fileName = saveToUploadFolder(request)
@@ -73,6 +77,9 @@ def recognitionImage():
 
     return fileRecognitionResult.json()
 
+'''
+deprecated
+'''
 def saveToUploadFolder(request):
     # check if the post request has the file part
     if 'file' not in request.files:

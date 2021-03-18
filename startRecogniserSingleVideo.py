@@ -5,7 +5,7 @@ import sys
 from ringFace.recogniser.singleVideo import recognition
 
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 
 if len(sys.argv) == 1:
     logging.error(f"usage: python3 {str(sys.argv[0])} /path/video.mp4")
@@ -14,4 +14,10 @@ if len(sys.argv) == 1:
 logging.debug(f"Argument List: {str(sys.argv)}")
 videoFile = sys.argv[1]
 
-recognition(videoFile)
+ringEvent = {
+    'eventName':'_commandline'
+}
+
+result = recognition(videoFile, ringEvent=ringEvent)
+
+logging.info(result)

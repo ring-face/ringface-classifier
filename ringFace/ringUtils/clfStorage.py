@@ -32,6 +32,10 @@ Returns a sklearn.svm.SVC instance
 """
 def loadLatestClassifier(classifierDir):
     list_of_files = glob.glob(f"{classifierDir}/*.dat")
+    if not list_of_files:
+        logging.warning("no classifier found")
+        return None
+
     latest_fitting = max(list_of_files, key=os.path.getctime)
 
     logging.info(f"Loading the classifier from {latest_fitting}")

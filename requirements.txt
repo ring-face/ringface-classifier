@@ -6,3 +6,4 @@ joblib
 sklearn
 opencv-python
 flask
+python-decouple
