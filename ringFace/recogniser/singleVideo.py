@@ -31,6 +31,7 @@ class VideoRecognitionData:
         self.persons = {}
         self.videoFile = videoFile
         self.recognisedPersons = set()
+        self.eventName = None
 
     def addImageFilePathToPerson(self, filePath, personName):
         self.persons[personName].imagePaths.append(filePath)
@@ -59,6 +60,7 @@ class VideoRecognitionData:
     def json(self):
         export = {}
         export['videoFile'] = self.videoFile
+        export['eventName'] = self.eventName
         export['recognisedPersons'] = list(self.recognisedPersons)
         export['unknownPersons'] = []
         for unknownPerson, personData in self.persons.items():
@@ -72,7 +74,7 @@ class VideoRecognitionData:
 
 
 
-def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, unprocessedEvent= None, ):
+def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ringEvent= None, ):
 
     personCounter = 1
 
@@ -162,8 +164,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, unpr
 
 
     saveResultAsRun(result, dirStructure.recogniserDir)
-    if unprocessedEvent is not None:
-        saveResultAsProcessedEvent(result, dirStructure.processedEvents, unprocessedEvent)
+    if ringEvent is not None:
+        saveResultAsProcessedEvent(result, dirStructure.processedEvents, ringEvent)
 
     return result
 
@@ -194,9 +196,10 @@ def saveResultAsRun(result, recogniserDir):
 
     logging.info(f"Saved result: {resultJson} to dir: {resultDir}")
 
-def saveResultAsProcessedEvent(result, processedEventsDir, unprocessedEvent):
-    logging.debug(f"saveResultAsProcessedEvent: {unprocessedEvent}")
-    eventName = unprocessedEvent['eventName']
+def saveResultAsProcessedEvent(result, processedEventsDir, ringEvent):
+    logging.debug(f"saveResultAsProcessedEvent: {ringEvent}")
+    eventName = ringEvent['eventName']
+    result.eventName = eventName
     resultDir = processedEventsDir + "/" + eventName
     if os.path.isdir(resultDir):
         logging.warning(f"Will replace content in {resultDir}")
