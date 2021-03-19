@@ -9,6 +9,7 @@ from sklearn import svm
 
 from ringFace.ringUtils import clfStorage, commons
 from . import helpers
+from . import encoder
 
 class FitterData:
     def __init__(self):
@@ -71,6 +72,33 @@ def fitEncodings(imagesDir, classifierDir):
     
 
     return fitterData
+
+
+def fitClassifier(fitClassifierRequest, dirStructure):
+    logging.info(f"fitClassifier : {fitClassifierRequest}")
+
+    encodings = []
+    encodingLabels = []
+
+    for personImages in fitClassifierRequest['persons']:
+        personImages['encodings'] = []
+        for imagePath in personImages['imagePaths']:
+            try:
+                encoding = encoder.encodeImage(imagePath)
+                encodings.append(encoding)
+                encodingLabels.append(personImages['personName'])
+                personImages['encodings'].append(encoding.tolist())
+            except helpers.MultiFaceError as err:
+                logging.warn(f"MultiFaceError on {imagePath}")
+
+    logging.debug(f"Starting the fitter with {len(encodings)} encodings of {len(fitClassifierRequest['persons'])} persons")
+    clf = svm.LinearSVC()
+    clf.fit(encodings,encodingLabels)
+    logging.debug(f"fitting finished")
+
+    clfStorage.saveClassifierWithRequest(clf, fitClassifierRequest, dirStructure.classifierDir)
+
+    return None
 
 
 

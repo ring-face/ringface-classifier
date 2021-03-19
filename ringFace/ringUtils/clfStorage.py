@@ -4,7 +4,7 @@ import logging
 import glob
 import os
 from joblib import load
-
+import json
 
 """
 Stores the passed classifier (clf) into a binary file
@@ -42,3 +42,21 @@ def loadLatestClassifier(classifierDir):
     clf = load(latest_fitting)
 
     return clf
+
+"""
+Stores the passed classifier (clf) into a binary file
+Stores the passed data (fitterData) into a json
+"""
+def saveClassifierWithRequest(clf, fitClassifierRequest, classifierDir):
+    name = time.strftime("%Y%m%d-%H%M%S")
+    clfFile = f"{classifierDir}/fitting.{name}.dat"
+    jsonFilePath = f"{classifierDir}/fitting.{name}.json"
+
+    logging.info(f"storing the fitted classifier to {jsonFilePath}")
+
+    dump(clf, clfFile) 
+
+    fitClassifierRequest['fittedClassifierFile'] = clfFile
+
+    with open(jsonFilePath, 'w') as outfile:
+        json.dump(fitClassifierRequest, outfile)

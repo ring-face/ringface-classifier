@@ -11,7 +11,7 @@ from ringFace.recogniser import singleImage, singleVideo
 from ringFace.ringUtils import clfStorage, dirStructure
 
 from ringFace.classifierRefit.encoder import processUnencoded
-from ringFace.classifierRefit.fitter import fitEncodings
+from ringFace.classifierRefit.fitter import fitEncodings, fitClassifier
 from ringFace.classifierRefit.qaTester import testClassifier
 
 
@@ -25,7 +25,7 @@ clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 logging.info("Server started")
 
 
@@ -96,8 +96,28 @@ def saveToUploadFolder(request):
         return filename
 
 
-@app.route('/classifier/run')
+@app.route('/classifier/fit', methods=["POST"])
 def classifier():
+        
+    fitClassifierRequest = request.json
+    logging.debug(f"Running the classifier on request {fitClassifierRequest}")
+
+    fitClassifierResult = fitClassifier(fitClassifierRequest, dirStructure)
+
+    # processUnencoded(dirStructure.imagesDir)
+    # fitterData = fitEncodings(dirStructure.imagesDir, dirStructure.classifierDir)
+    # testClassifier(fitterData.fittedClassifierFile, dirStructure.imagesDir)
+
+    # global clf
+    # clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
+
+    return jsonify({"status":"OK"})
+
+'''
+deprecated
+'''
+@app.route('/classifier/run-old')
+def classifierOld():
         
     logging.info(f"Rerunning the classifier")
 
