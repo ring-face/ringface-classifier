@@ -75,7 +75,7 @@ class VideoRecognitionData:
 
 
 
-def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ringEvent= None):
+def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitClassifierData = None, ringEvent= None):
 
     personCounter = 1
 
@@ -83,7 +83,7 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ring
     result = VideoRecognitionData(videoFile)
 
     if clf is None:
-        clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
+        clf, fitClassifierData = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
     input_movie = cv2.VideoCapture(videoFile)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -138,9 +138,11 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ring
             #process the recognised face
             if clf is not None:
                 name = clf.predict([encoding])
-                encodingsDir=dirStructure.imagesDir + "/" + name[0] + "/encodings"
+                # encodingsDir=dirStructure.imagesDir + "/" + name[0] + "/encodings"
 
-                if commons.isWithinTolerance(encoding, encodingsDir):
+                # if commons.isWithinTolerance(encoding, encodingsDir):
+                knownFaceEncodings = findKnownFaceEncodings(name, fitClassifierData)
+                if commons.isWithinToleranceToEncodings(encoding, knownFaceEncodings):    
                     logging.info(f"Recognised: {name} in frame {frame_counter}")
                     result.addRecognisedPerson(name[0])
                     continue
@@ -173,6 +175,15 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, ring
         saveResultAsProcessedEvent(result, dirStructure, ringEvent)
 
     return result.json()
+
+def findKnownFaceEncodings(name, fitClassifierData):
+    for personImages in fitClassifierData['persons']:
+        if personImages['personName'] == name:
+            logging.debug(f"found {len(personImages['encodingsAsNumpyArray'])} known face encodings for {name}")
+            return personImages['encodingsAsNumpyArray']
+
+    logging.info(f"can not find known face encodings for {name}")
+    return []
 
 def faceTooSmall(faceLocation):
     top, right, bottom, left = faceLocation

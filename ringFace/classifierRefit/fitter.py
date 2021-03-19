@@ -98,7 +98,7 @@ def fitClassifier(fitClassifierRequest, dirStructure):
 
     clfStorage.saveClassifierWithRequest(clf, fitClassifierRequest, dirStructure.classifierDir)
 
-    return None
+    return fitClassifierRequest
 
 
 

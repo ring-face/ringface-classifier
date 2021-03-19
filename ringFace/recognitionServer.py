@@ -15,17 +15,18 @@ from ringFace.classifierRefit.fitter import fitEncodings, fitClassifier
 from ringFace.classifierRefit.qaTester import testClassifier
 
 
+logging.getLogger().setLevel(logging.DEBUG)
+
 UPLOAD_FOLDER = '/tmp'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'mp4'}
 
 dirStructure = dirStructure.DEFAULT_DIR_STUCTURE
 
-clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
+clf, fitClassifierData = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-logging.getLogger().setLevel(logging.DEBUG)
 logging.info("Server started")
 
 
@@ -49,7 +50,7 @@ def recognitionLocalVideo():
 
     videoFilePath = event['videoFileName']
     
-    videoRecognitionResult = singleVideo.recognition(videoFilePath, dirStructure, clf, event)
+    videoRecognitionResult = singleVideo.recognition(videoFilePath, dirStructure, clf, fitClassifierData, event)
 
     return Response(videoRecognitionResult, mimetype='application/json')
 
@@ -102,16 +103,9 @@ def classifier():
     fitClassifierRequest = request.json
     logging.debug(f"Running the classifier on request {fitClassifierRequest}")
 
-    fitClassifierResult = fitClassifier(fitClassifierRequest, dirStructure)
+    fitClassifierData = fitClassifier(fitClassifierRequest, dirStructure)
 
-    # processUnencoded(dirStructure.imagesDir)
-    # fitterData = fitEncodings(dirStructure.imagesDir, dirStructure.classifierDir)
-    # testClassifier(fitterData.fittedClassifierFile, dirStructure.imagesDir)
-
-    # global clf
-    # clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
-
-    return jsonify({"status":"OK"})
+    return jsonify(fitClassifierData)
 
 '''
 deprecated
