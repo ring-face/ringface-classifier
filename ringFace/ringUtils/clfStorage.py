@@ -37,7 +37,7 @@ def loadLatestClassifier(classifierDir):
     list_of_files = glob.glob(f"{classifierDir}/*.json")
     if not list_of_files:
         logging.warning("no classifier found")
-        return None
+        return None, None
 
     latestJsonPath = max(list_of_files, key=os.path.getctime)
 
