@@ -1,6 +1,28 @@
 # This is the repo for the classifier retrain service
 
-This service will use the directory structure that is sampled in the `sample-data` dir. It will refit the classifier, and persist the fitted classifier in a persistent file. 
+The classifier server is the wrapper around the AI part of the solution. It exposes services 
+* to process a new video, 
+* to tag the faces in the video to persons
+* and to retrain the classifier to auto-tag the persons in the next video.
+
+## How to run
+Install and run the python virtual env
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+```
+
+## To start the server 
+```bash
+./startServer.sh
+# post image
+curl -F "file=@./data/images/barack/test-images/barack3.jpeg" http://localhost:5000/recognition/singe-image
+# post video
+curl -F "file=@./sample-data/test.mp4" http://localhost:5000/recognition/singe-video
+
+```
+
 
 # How to train the classifier
 ```bash
@@ -57,24 +79,3 @@ python3 startRecogniserSingleVideo.py ./sample-data/ring-sample-video.mp4
 * and then the model can be retrained
 
 
-# The recognition server
-* loads the latest fitter setup at startup
-* takes one file as input
-* stores it in /tmp
-* recognises the persons, and returns a HTTP 200 plus structured response similar to
-```json
-// image result
-{"personImageFile": "/tmp/barack4.jpeg", "recognisedPersons": ["michele", "barack"], "unknownPersons": []}
-// video result
-{"videoFile": "sample-data/test.mp4", "recognisedPersons": [], "unknownPersons": [{"name": "unknown-1", "images": 2}, {"name": "unknown-2", "images": 2}, {"name": "unknown-3", "images": 1}]}
-```
-
-## To start the server 
-```bash
-./startServer.sh
-# post image
-curl -F "file=@./data/images/barack/test-images/barack3.jpeg" http://localhost:5000/recognition/singe-image
-# post video
-curl -F "file=@./sample-data/test.mp4" http://localhost:5000/recognition/singe-video
-
-```
