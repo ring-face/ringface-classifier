@@ -15,7 +15,7 @@ from ringFace.classifierRefit.fitter import fitEncodings, fitClassifier
 from ringFace.classifierRefit.qaTester import testClassifier
 
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
 UPLOAD_FOLDER = '/tmp'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'mp4'}
