@@ -24,14 +24,6 @@ curl -F "file=@./sample-data/test.mp4" http://localhost:5000/recognition/singe-v
 ```
 
 
-# How to train the classifier
-```bash
-pip3 install -r requirements.txt
-#rm -rf data
-cp -r sample-data data
-python3 startClassifier.py
-```
-
 # The training process will do the following steps.
 
 Phase 1: Encode the unencoded images
