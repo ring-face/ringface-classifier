@@ -19,10 +19,7 @@ from ringFace.ringUtils.dirStructure import DEFAULT_DIR_STUCTURE
 import time
 
 
-EACH_FRAME=2
-MAX_FRAMES=100
-STOP_AFTER_EMPTY_FREAMES=10
-MIN_TRUMBNAIL_SIZE_IN_PX=120
+
 
 class PersonData:
     def __init__(self):
@@ -108,11 +105,11 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
             if not frame_got:
                 break
             
-            if frame_counter > MAX_FRAMES:
-                logging.warn(f"will not consider more than first {MAX_FRAMES} frames")
+            if frame_counter > config('MAX_FRAMES', cast=int):
+                logging.warn(f"will not consider more than first {config('MAX_FRAMES', cast=int)} frames")
                 break
 
-            if frame_counter % EACH_FRAME != 0:
+            if frame_counter % config('EACH_FRAME', cast=int)  != 0:
                 logging.debug(f"frame {frame_counter}: skippping ")
                 continue
 
@@ -139,7 +136,7 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
             # stop after couple of empty frames
             if facesCount == 0:
                 noFaceFrameCounter += 1
-                if noFaceFrameCounter >= STOP_AFTER_EMPTY_FREAMES:
+                if noFaceFrameCounter >= config('STOP_AFTER_EMPTY_FRAMES', cast=int) :
                     logging.warn(f"frame {frame_counter}: noFaceFrameCounter: {noFaceFrameCounter}. Stopping")
                     break
                 else:
@@ -218,7 +215,7 @@ def findKnownFaceEncodings(name, fitClassifierData, frame_counter):
 
 def faceTooSmall(faceLocation, frame_counter):
     top, right, bottom, left = faceLocation
-    if bottom - top < MIN_TRUMBNAIL_SIZE_IN_PX or right - left < MIN_TRUMBNAIL_SIZE_IN_PX:
+    if bottom - top < config('MIN_TRUMBNAIL_SIZE_IN_PX', cast=int) or right - left < config('MIN_TRUMBNAIL_SIZE_IN_PX', cast=int):
         logging.debug(f"frame {frame_counter}: Face too small: {bottom - top} x {right - left}")
         return True
     else:
