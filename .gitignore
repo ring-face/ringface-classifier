@@ -6,3 +6,5 @@ venv
 
 sample-data/dora-reka.mp4
 **/__pycache__/**
+
+gcloud/**
