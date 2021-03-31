@@ -197,7 +197,7 @@ def extractFromImageParallel(image, frame_counter):
     logging.debug(f"frame {frame_counter}: extractFromImageParallel")
     face_locations = face_recognition.face_locations(image)
 
-    encodings = face_recognition.face_encodings(image)
+    encodings = face_recognition.face_encodings(image, face_locations)
 
     logging.debug(f"frame {frame_counter}: extracted locations and encodings")
     return frame_counter, face_locations, encodings
