@@ -3,6 +3,8 @@
 import logging
 import sys
 from ringFace.recogniser.singleVideo import recognition
+import multiprocessing as mp
+
 
 
 logging.basicConfig(format='%(message)s', level=logging.DEBUG)
@@ -20,6 +22,11 @@ if __name__ == '__main__':
     ringEvent = {
         'eventName':'_commandline'
     }
+
+
+
+    # unify the parallelism setup as spaws on both mac and linux
+    mp.set_start_method('spawn')
 
     result = recognition(videoFile, ringEvent=ringEvent)
 

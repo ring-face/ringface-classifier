@@ -4,6 +4,8 @@ import os
 from joblib import load
 from PIL import Image
 import logging
+import multiprocessing as mp
+
 
 from werkzeug.utils import secure_filename
 
@@ -28,6 +30,9 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 logging.info("Server started")
+
+# unify the parallelism setup as spaws on both mac and linux
+mp.set_start_method('spawn')
 
 
 def allowed_file(filename):

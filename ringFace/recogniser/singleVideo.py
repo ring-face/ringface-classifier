@@ -95,8 +95,6 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
     extractionResults = []
 
     # process the math heavy part in parallel
-    mp.set_start_method('spawn')
-
     with mp.Pool(processes= config('PARALLELISM', cast=int)) as pool:
         while True:
             
