@@ -127,7 +127,7 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
 
         # process the results sequentially
         for res in extractionResults:
-            frame_counter, face_locations, encodings = res.get()
+            frame_counter, face_locations, encodings, image = res.get()
             logging.debug(f"frame {frame_counter}: postprocessing")
 
             facesCount = len(face_locations)
@@ -200,7 +200,7 @@ def extractFromImageParallel(image, frame_counter):
     encodings = face_recognition.face_encodings(image, face_locations)
 
     logging.debug(f"frame {frame_counter}: extracted locations and encodings")
-    return frame_counter, face_locations, encodings
+    return frame_counter, face_locations, encodings, image
 
 
 
