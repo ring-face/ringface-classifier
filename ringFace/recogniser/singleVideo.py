@@ -94,6 +94,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
 
     extractionResults = []
 
+    faceFound = False
+
     # process the math heavy part in parallel
     with mp.Pool(processes= config('PARALLELISM', cast=int)) as pool:
         while True:
@@ -109,7 +111,7 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
                 logging.warn(f"will not consider more than first {config('MAX_FRAMES', cast=int)} frames")
                 break
 
-            if frame_counter % config('EACH_FRAME', cast=int)  != 0:
+            if frame_counter > config('MIN_FRAMES', cast=int) and frame_counter % config('EACH_FRAME', cast=int)  != 0:
                 logging.debug(f"frame {frame_counter}: skippping ")
                 continue
 
@@ -136,8 +138,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
             # stop after couple of empty frames
             if facesCount == 0:
                 noFaceFrameCounter += 1
-                if noFaceFrameCounter >= config('STOP_AFTER_EMPTY_FRAMES', cast=int) :
-                    logging.warn(f"frame {frame_counter}: noFaceFrameCounter: {noFaceFrameCounter}. Stopping")
+                if faceFound and frame_counter > config('MIN_FRAMES', cast=int) and noFaceFrameCounter >= config('STOP_AFTER_EMPTY_FRAMES', cast=int) :
+                    logging.warn(f"frame {frame_counter}: noFaceFrameCounter reached: {noFaceFrameCounter}. Stopping")
                     break
                 else:
                     continue
@@ -158,6 +160,7 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
                     knownFaceEncodings = findKnownFaceEncodings(name, fitClassifierData, frame_counter)
                     if commons.isWithinToleranceToEncodings(encoding, knownFaceEncodings):    
                         logging.info(f"frame {frame_counter}: Recognised: {name}")
+                        faceFound = True
                         result.addRecognisedPerson(name[0])
                         continue
 
