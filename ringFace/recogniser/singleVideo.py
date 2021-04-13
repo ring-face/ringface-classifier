@@ -173,6 +173,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
                 logging.debug(f"frame {frame_counter}: "+"The unknown face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
                 thumbnail = image[top:bottom, left:right]
                 pilThumbnail = PIL.Image.fromarray(thumbnail)
+                faceFound = True
+
                 # if logging.getLogger().level == logging.DEBUG:
                 #     pilThumbnail.show()
 
