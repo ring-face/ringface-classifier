@@ -96,6 +96,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
 
     faceFound = False
 
+    logging.debug(f"frame 0 - {config('MAX_FRAMES')}: scheduling for extraction ")
+
     # process the math heavy part in parallel
     with mp.Pool(processes= config('PARALLELISM', cast=int)) as pool:
         while True:
@@ -112,7 +114,7 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
                 break
 
             if frame_counter > config('MIN_FRAMES', cast=int) and frame_counter % config('EACH_FRAME', cast=int)  != 0:
-                logging.debug(f"frame {frame_counter}: skippping ")
+                # logging.debug(f"frame {frame_counter}: skipping ")
                 continue
 
 
@@ -122,15 +124,15 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
             start_time = time.time()
             image = frame[:, :, ::-1]
             extractionResults.append(pool.apply_async(extractFromImageParallel, (image, frame_counter)))
-            logging.debug(f"frame {frame_counter}: scheduled for extraction ")
 
 
         # pool.close()
 
+
         # process the results sequentially
         for res in extractionResults:
             frame_counter, face_locations, encodings, image = res.get()
-            logging.debug(f"frame {frame_counter}: postprocessing")
+            # logging.debug(f"frame {frame_counter}: postprocessing")
 
             facesCount = len(face_locations)
             logging.debug(f"frame {frame_counter}: Number of faces detected: {facesCount}")
