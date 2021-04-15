@@ -142,6 +142,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
                 noFaceFrameCounter += 1
                 if faceFound and frame_counter > config('MIN_FRAMES', cast=int) and noFaceFrameCounter >= config('STOP_AFTER_EMPTY_FRAMES', cast=int) :
                     logging.warn(f"frame {frame_counter}: noFaceFrameCounter reached: {noFaceFrameCounter}. Stopping")
+                    # at this point we do not need more 
+                    pool.terminate()
                     break
                 else:
                     continue
@@ -190,6 +192,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
                     logging.info(f"frame {frame_counter}: New {newPersonName} in the frame {frame_counter}")
                     result.addToPerson(newPersonName, pilThumbnail, encoding)
 
+    logging.debug("wait for the workers to terminate")
+    pool.join()
 
     # saveResultAsRun(result, dirStructure.recogniserDir)
     if ringEvent is not None:

@@ -7,7 +7,7 @@ import multiprocessing as mp
 
 
 
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.DEBUG)
 
 
 if __name__ == '__main__':
