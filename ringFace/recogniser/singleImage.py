@@ -48,7 +48,7 @@ def recognition(personImageFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None
     result = ImageRecognitionResult(personImageFile)
 
     if clf is None:
-        clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
+        clf, fitClassifierData = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
     image = face_recognition.load_image_file(personImageFile)
 
