@@ -167,6 +167,8 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
                         faceFound = True
                         result.addRecognisedPerson(name[0])
                         continue
+                    else :
+                        logging.debug(f"frame {frame_counter}: Face outside of tolerance for {name}")
 
                 # unknown face processing
                 # do not process too small faces

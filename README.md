@@ -1,56 +1,82 @@
 # This is the repo for the classifier retrain service
 
 The classifier server is the wrapper around the AI part of the solution. It exposes services 
-* to process a new video, 
-* to tag the faces in the video to persons
-* and to retrain the classifier to auto-tag the persons in the next video.
+* to fit a classifier to assing a name to a face encofing (SVC Classifier)
+* to find face thumbnails in images (HOG algorithm)
+* to find face thumbnails in frames of videos in parallel (HOG algorithm)
+* to encode a face into an encoding (the actual AI work)
+* and to apply the SVC classifier to the encoding.
 
-## How to run
+# Glossary
+A `face encoding` is a 200 dimensional array, derived from a face thumbnail, which is the output of the [dlib](http://dlib.net/)'s state-of-the-art face recognition. The training of the AI has been done externally, and its weights are loaded at server start. This is the actual AI in the solution. DLIB is used indirectly via the https://github.com/ageitgey/face_recognition module. 
+
+The `SVC Classifier` is a linear classifier from [scikit](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html).
+
+The `HOG` is the [Histogram of oriented gradients](https://pyimagesearch.com/2021/04/19/face-detection-with-dlib-hog-and-cnn/) algorithm. It is used to find face thumbnails in a much larger image, or video frame. 
+
+# How to run
 Install and run the python virtual env
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+# your installation may fail due to missing cmake, which is needed to compile the https://github.com/davisking/dlib library
+# install cmake before you run the next step (eg. brew install cmake)
 pip3 install -r requirements.txt
+
 ```
 
 ## To start the server 
+You will be interacting with the service over HTTP. 
 ```bash
 ./startServer.sh
-# post image
-curl -F "file=@./data/images/barack/test-images/barack3.jpeg" http://localhost:5000/recognition/singe-image
-# post video
-curl -F "file=@./sample-data/test.mp4" http://localhost:5000/recognition/singe-video
+```
 
+## The fitting
+Fitting is required to fit the `SVC Classifier` on your already known images. It has 3 phases under the hood, documented below. You can run it simply for the sample images of 2 presidents with
+
+```bash
+curl --location --request POST 'http://localhost:5001/classifier/fit' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+"persons":[
+    {
+        "personName": "Barack Obama",
+        "imagePaths": [
+            "./sample-data/images/barack/new-images/barack1.jpeg",
+            "./sample-data/images/barack/new-images/barack2.jpeg"
+        ]
+    },
+    {
+        "personName": "Donald Trump",
+        "imagePaths": [
+            "sample-data/images/donald/new-images/donald1.jpeg",
+            "sample-data/images/donald/new-images/donald2.jpeg"
+        ]
+    }
+]
+}'
+```
+At this point, your classifier is fitted, and can be tested on previously unseen faces or videos of these 2 gentlemen. 
+
+## The recognition
+
+To test the recognition, run 
+
+```bash
+curl --location --request POST 'http://localhost:5001/recognition/local-image' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "eventName": "20221003-200000",
+  "imageFilePath": "./sample-data/images/barack/test-images/barack3.jpeg"
+}'
+
+### {"inputFile": "./sample-data/images/barack/test-images/barack3.jpeg", "recognisedPersons": ["Barack Obama"], "unknownPersons": []}
 ```
 
 
-# The training process will do the following steps.
-
-Phase 1: Encode the unencoded images
-* Encode images in the `new-images` dir and move the file to `encoded-images` dir
-* The encoding information is saved as a json array to file in the `encodings` dir under the same file name as the image with `.json` extension
-* encoding is using the face_recognition lib, which uses dlib as underlying
-* the dlib pretrained model for encoding is loaded at startup from [face_recoginition_models](https://github.com/ageitgey/face_recognition_models/tree/master/face_recognition_models/models) lib
-
-
-Phase 2: Fit the [Support Vector Classifier](https://scikit-learn.org/stable/modules/svm.html#svm-classification) with the data from the `encodings` dir
-* Load each file from the `encodings` folder into a numpy array
-* create the same sized array with the name of the persons, where `encodings[i]` represents the encoded face of `persons[i]`
-* run `newClassifier=SVC.fit(encodings, persons)`
-* [persist](https://scikit-learn.org/stable/modules/model_persistence.html) the `newModel` to the `data/classifier` dir in as `fitting.timestamp` 
-
-Phase 3: Test the new model
-* loads the persisted classifier, and tests ist capabilities on the test set of the **/test-images folder
-* in addition to the classification, it calculates an euclidian distance from the encodings of the found person
-* only if the distance is below a treshold, is the classification valid
-* this avoids recognising arbitrary face as known person
-
-
-Once this is finished, the proces exits
-
-# How to use the trained classifier on a file
+# How to use the trained classifier on a file without starting the server
 ```bash
-python3 startRecogniserSingleImage.py ./data/images/barack/test-images/barack4.jpeg
+python3 startRecogniserSingleImage.py ./sampe-data/images/barack/test-images/barack4.jpeg
 # you can download a sample video here: https://www.youtube.com/watch?v=4P-4PlwTcoE
 python3 startRecogniserSingleVideo.py ./sample-data/ring-sample-video.mp4
 ```

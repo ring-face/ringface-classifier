@@ -59,6 +59,18 @@ def recognitionLocalVideo():
 
     return Response(videoRecognitionResult, mimetype='application/json')
 
+@app.route('/recognition/local-image', methods=["POST"])
+def recognitionLocalImage():
+
+    event = request.json
+    logging.info(f"will process event {event}")
+        
+    imageFilePath = event['imageFilePath']
+
+    imageRecognitionResult = singleImage.recognition(imageFilePath, dirStructure, clf, fitClassifierData)
+
+    return imageRecognitionResult.json()
+
 '''
 deprecated
 '''
