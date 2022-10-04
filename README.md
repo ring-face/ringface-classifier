@@ -29,6 +29,7 @@ pip3 install -r requirements.txt
 You will be interacting with the service over HTTP. 
 ```bash
 ./startServer.sh
+# Running on http://192.168.1.161:5001
 ```
 
 ## The fitting
@@ -60,19 +61,29 @@ At this point, your classifier is fitted, and can be tested on previously unseen
 
 ## The recognition
 
-To test the recognition, run 
+To test the recognition on an test image, run 
 
 ```bash
 curl --location --request POST 'http://localhost:5001/recognition/local-image' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-  "eventName": "20221003-200000",
+  "eventName": "my-image-event",
   "imageFilePath": "./sample-data/images/barack/test-images/barack3.jpeg"
 }'
 
 ### {"inputFile": "./sample-data/images/barack/test-images/barack3.jpeg", "recognisedPersons": ["Barack Obama"], "unknownPersons": []}
 ```
 
+You can also run the recoginition on a video, in which case each frame will be tested for a face.
+
+```bash
+curl --location --request POST 'http://localhost:5001/recognition/local-video' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "eventName": "my-video-event",
+  "videoFileName": "./downloaeded-video-of-some-president.mp4"
+}'
+```
 
 # How to use the trained classifier on a file without starting the server
 ```bash
