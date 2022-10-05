@@ -1,8 +1,18 @@
 version: "3.9"
 services:
-  classifier-server:
-    build: .
-    ports:
-      - "5000:5000"
-    volumes: 
+  ringface-classifier:
+    image: ringface/classifier:latest
+    container_name: ringface-classifier
+    volumes:
       - ./data:/app/data
+      - ./sample-data:/app/sample-data
+    ports:
+      - 5001:5001
+    environment: 
+      - DATA_DIR=/app/data
+      - PARALLELISM=4 # how many frames should be processed in parallel (CPU parallelism)
+      - MIN_FRAMES=50 # process the first 50 frames each
+      - EACH_FRAME=2 # 2 means each second frame is processed
+      - MAX_FRAMES=150 # dont process more than the first 150 frames of the video (ring FPS is 15)
+      - STOP_AFTER_EMPTY_FRAMES=10 # stop when 10 subsequent frames had no face 
+      - MIN_TRUMBNAIL_SIZE_IN_PX=100 # min face size to consider for training
