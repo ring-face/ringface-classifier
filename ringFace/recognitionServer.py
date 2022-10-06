@@ -15,6 +15,7 @@ from ringFace.ringUtils import clfStorage, dirStructure
 from ringFace.classifierRefit.encoder import processUnencoded
 from ringFace.classifierRefit.fitter import fitEncodings, fitClassifier
 from ringFace.classifierRefit.qaTester import testClassifier
+from ringFace.ringUtils.clfStorage import parseEncodingsAsNumpyArrays
 
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.DEBUG)
@@ -59,6 +60,35 @@ def recognitionLocalVideo():
 
     return Response(videoRecognitionResult, mimetype='application/json')
 
+@app.route('/recognition/local-image', methods=["POST"])
+def recognitionLocalImage():
+
+    event = request.json
+    logging.info(f"will process event {event}")
+        
+    imageFilePath = event['imageFilePath']
+
+    imageRecognitionResult = singleImage.recognition(imageFilePath, dirStructure, clf, fitClassifierData)
+
+    return imageRecognitionResult.json()
+
+
+@app.route('/classifier/fit', methods=["POST"])
+def classifier():
+        
+    fitClassifierRequest = request.json
+    logging.debug(f"Running the classifier on request {fitClassifierRequest}")
+
+    global fitClassifierData
+    global clf
+    fitClassifierData, clf = fitClassifier(fitClassifierRequest, dirStructure)
+    res = jsonify(fitClassifierData)
+    parseEncodingsAsNumpyArrays(fitClassifierData)
+
+
+    return res
+
+
 '''
 deprecated
 '''
@@ -101,16 +131,6 @@ def saveToUploadFolder(request):
         file.save(filename)
         return filename
 
-
-@app.route('/classifier/fit', methods=["POST"])
-def classifier():
-        
-    fitClassifierRequest = request.json
-    logging.debug(f"Running the classifier on request {fitClassifierRequest}")
-
-    fitClassifierData = fitClassifier(fitClassifierRequest, dirStructure)
-
-    return jsonify(fitClassifierData)
 
 '''
 deprecated

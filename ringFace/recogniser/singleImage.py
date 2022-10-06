@@ -43,12 +43,12 @@ class ImageRecognitionResult:
         return json.dumps(self.info.__dict__)
 
 
-def recognition(personImageFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None):
+def recognition(personImageFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitClassifierData = None):
 
     result = ImageRecognitionResult(personImageFile)
 
     if clf is None:
-        clf = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
+        clf, fitClassifierData = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
 
     image = face_recognition.load_image_file(personImageFile)
 
@@ -62,9 +62,9 @@ def recognition(personImageFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None
     for i in range(no):
         encoding = encodings[i]
         name = clf.predict([encoding])
-        encodingsDir=dirStructure.imagesDir + "/" + name[0] + "/encodings"
 
-        if commons.isWithinTolerance(encoding, encodingsDir):
+        knownFaceEncodings = findKnownFaceEncodings(name, fitClassifierData)
+        if commons.isWithinToleranceToEncodings(encoding, knownFaceEncodings): 
             logging.info(f"Recognised: {name}")
             result.addPerson(name[0])
         else: 
@@ -78,12 +78,19 @@ def recognition(personImageFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None
                 pilThumbnail.show()
             
 
-    saveResult(result, dirStructure.recogniserDir)
+    # saveResult(result, dirStructure.recogniserDir)
 
     return result
 
 
+def findKnownFaceEncodings(name, fitClassifierData):
+    for personImages in fitClassifierData['persons']:
+        if personImages['personName'] == name:
+            logging.debug(f"found {len(personImages['encodingsAsNumpyArray'])} known face encodings for {name}")
+            return personImages['encodingsAsNumpyArray']
 
+    logging.info(f"can not find known face encodings for {name}")
+    return []
 
 
 def saveResult(result, recogniserDir):
