@@ -22,6 +22,15 @@ The `SVC Classifier` is a linear classifier from [scikit](https://scikit-learn.o
 The `HOG` is the [Histogram of oriented gradients](https://pyimagesearch.com/2021/04/19/face-detection-with-dlib-hog-and-cnn/) algorithm. It is used to find all face thumbnails in a much larger image, or video frame. 
 
 # How to run
+
+You will be interacting with the API over HTTP. Start the server via docker
+
+```bash
+docker-compose up # this may take couple of minutes 
+```
+
+## Alternatively, start from the command line
+
 Install and run the python virtual env
 ```bash
 python3 -m venv venv # will create your virtual env
@@ -29,18 +38,12 @@ source venv/bin/activate # will activate this virtual env
 # the next step may fail due to missing cmake, which is required to compile the source distribution of the https://github.com/davisking/dlib library
 # install cmake before you run the next step (eg. brew install cmake)
 pip3 install -r requirements.txt
-
-```
-
-## To start the server 
-You will be interacting with the API over HTTP. 
-```bash
 ./startServer.sh
-# Running on http://192.168.1.161:5001
+# Running on http://localhost:5001
 ```
 
 ## The fitting
-Fitting is required to fit the `SVC Classifier` on your already known(tagged) images.  You can run it simply for the bundled sample images of 2 presidents (Obama, Trump)  the below command. Replace the `personName`, and the `imagePaths` and add more `persons` for your own DB of faces.
+Fitting is required teach the system your already known faces, eg to fit the `SVC Classifier` on your already known(tagged) images.  You can run it simply for the bundled sample images of 2 presidents (Obama, Trump) with the below command. Replace the `personName`, and the `imagePaths` and add more `persons` for your own database of faces.
 
 ```bash
 curl --location --request POST 'http://localhost:5001/classifier/fit' \
