@@ -129,6 +129,48 @@ python3 startRecogniserSingleVideo.py ./sample-data/downloaded-video.mp4
 ```
 
 
+# Install on GCP cloudrun
+https://cloud.google.com/run/docs/tutorials/network-filesystems-filestore
 
+[Enable the apis](https://console.cloud.google.com/apis/enableflow?apiid=run.googleapis.com,file.googleapis.com,vpcaccess.googleapis.com,cloudbuild.googleapis.com,artifactregistry.googleapis.com)
 
+Create the filestore to access
+```bash
+
+gcloud config set run/region europe-west3
+gcloud config set filestore/zone europe-west3-a 
+
+gcloud filestore instances create ringface \
+    --tier=STANDARD \
+    --file-share=name=vol1,capacity=1TiB \
+    --network=name="default"
+```
+
+Set up a Serverless VPC Access connector
+```bash
+gcloud compute networks vpc-access connectors create firestore-from-cloudrun \
+  --region europe-west3 \
+  --range "10.8.0.0/28"
+```
+
+Get the IP of the filestore
+```bash
+export FILESTORE_IP_ADDRESS=$(gcloud filestore instances describe ringface --format "value(networks.ipAddresses[0])")
+```
+
+Create a service account to serve as the service identity. By default this has no privileges other than project membership.
+
+```bash
+gcloud iam service-accounts create fs-identity
+```
+
+Build and deploy
+```bash
+gcloud beta run deploy ringface-classifier --source . \
+    --vpc-connector firestore-from-cloudrun \
+    --execution-environment gen2 \
+    --allow-unauthenticated \
+    --service-account fs-identity \
+    --update-env-vars FILESTORE_IP_ADDRESS=$FILESTORE_IP_ADDRESS,FILE_SHARE_NAME=vol1
+```
 
