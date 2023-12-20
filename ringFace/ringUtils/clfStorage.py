@@ -35,22 +35,18 @@ import joblib
 Loads the latest *.dat file from the passed or standard classifier dir
 Returns a sklearn.svm.SVC instance
 """
-def loadLatestClassifier(classifierDir):
-    list_of_files = glob.glob(f"classifier/*.json")
-    if not list_of_files:
-        logging.warning("no classifier found")
-        return None, None
+def loadLatestClassifier():
 
-    latestJsonPath = max(list_of_files, key=os.path.getctime)
+
+    latestJsonPath = gcs.latest_classifier()
 
     logging.info(f"Loading the classifier from {latestJsonPath}")
-    with open(latestJsonPath) as json_file:
-        fitClassifierData = json.load(json_file)
-        parseEncodingsAsNumpyArrays(fitClassifierData)
+    fitClassifierData = json.load(gcs.filelike_for_read(latestJsonPath))
+    parseEncodingsAsNumpyArrays(fitClassifierData)
 
     clfDumpFile = fitClassifierData['fittedClassifierFile']
     logging.info(f"Loading the classifier from {clfDumpFile}")
-    clf = joblib.load(gcs.blob(clfDumpFile))
+    clf = joblib.load(gcs.filelike_for_read(clfDumpFile))
 
     return clf, fitClassifierData
 

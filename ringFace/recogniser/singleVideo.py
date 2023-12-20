@@ -1,3 +1,4 @@
+from io import BytesIO
 import logging
 import os
 import sys
@@ -13,8 +14,7 @@ from decouple import config
 
 from ringFace.classifierRefit import helpers
 
-from ringFace.ringUtils import commons, clfStorage
-from ringFace.ringUtils.dirStructure import DEFAULT_DIR_STUCTURE
+from ringFace.ringUtils import commons, clfStorage, gcs
 
 import time
 
@@ -75,17 +75,16 @@ class VideoRecognitionData:
 
 
 
-def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitClassifierData = None, ringEvent= None):
+def recognition(videoFile, ringEvent= None):
 
     personCounter = 1
 
     logging.info(f"processing input video {videoFile}")
     result = VideoRecognitionData(videoFile)
 
-    if clf is None:
-        clf, fitClassifierData = clfStorage.loadLatestClassifier(dirStructure.classifierDir)
+    clf, fitClassifierData = clfStorage.loadLatestClassifier()
 
-    input_movie = cv2.VideoCapture(videoFile)
+    input_movie = cv2.VideoCapture(gcs.tmpfile_for_read(videoFile))
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
     logging.info(f"Total frames: {length}")
 
@@ -199,7 +198,7 @@ def recognition(videoFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None, fitC
 
     # saveResultAsRun(result, dirStructure.recogniserDir)
     if ringEvent is not None:
-        saveResultAsProcessedEvent(result, dirStructure, ringEvent)
+        saveResultAsProcessedEvent(result, ringEvent)
 
     return result.json()
 
@@ -235,30 +234,27 @@ def faceTooSmall(faceLocation, frame_counter):
         return False
 
 
-def saveResultAsProcessedEvent(result, dirStructure, ringEvent):
+def saveResultAsProcessedEvent(result, ringEvent):
     logging.debug(f"saveResultAsProcessedEvent: {ringEvent}")
     eventName = ringEvent['eventName']
     result.eventName = eventName
-    resultDir = dirStructure.images + "/" + eventName
-    if os.path.isdir(resultDir):
-        logging.warning(f"Will replace content in {resultDir}")
-    else:
-        os.mkdir(resultDir)
+    resultDir = "images/" + eventName
 
     for unknownPersonName, personData in result.persons.items():
         for faceImage in personData.images:
+            buffer = BytesIO()
+            faceImage.save(buffer, "JPEG")
+
             filename = "face-" + uuid.uuid4().hex + ".jpeg"
             imageFilePath = resultDir + "/" + filename
-            faceImage.save(imageFilePath, "JPEG")
+            gcs.save_binary(buffer, imageFilePath, content_type="image/jpeg")
 
             result.addImageFilePathToPerson(imageFilePath, unknownPersonName)
 
     resultJson = result.json()
 
 
-    fileHandler = open(resultDir + "/processingResult.json", "w")
-    fileHandler.write(resultJson)
-    fileHandler.close()
+    gcs.save_json_to_gcs(resultJson, resultDir + "/processingResult.json")
 
     logging.info(f"Saved result: {resultJson} to dir: {resultDir}")
 

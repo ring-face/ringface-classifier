@@ -1,9 +1,11 @@
 import logging
 import functions_framework
-from flask import jsonify
+from flask import Response, jsonify
 
 
 from ringFace.classifierRefit.fitter import fitClassifier
+from ringFace.recogniser import singleVideo
+
 # from ringFace.ringUtils.clfStorage import parseEncodingsAsNumpyArrays
 
 
@@ -18,18 +20,30 @@ def fit(request):
     
     try:
         fitClassifierRequest = request.json
-        logging.debug(f"Running the classifier on request {fitClassifierRequest}")
+        logging.debug(f"Running the fitting on request {fitClassifierRequest}")
 
-        global fitClassifierData
-        global clf
         fitClassifierData, clf = fitClassifier(fitClassifierRequest)
         res = jsonify(fitClassifierData)
-        # parseEncodingsAsNumpyArrays(fitClassifierData)
-
 
         return res
     except Exception as e:
         logging.error(f"An error occurred: {e}", exc_info=True)
         return jsonify({"error": f"An error occurred: {e}"}), 500   
      
+@functions_framework.http
+def recognition(request):
+    try:
+        event = request.json
+        logging.info(f"will process event {event}")
+
+        videoFilePath = event['videoFileName']
+        
+        videoRecognitionResult = singleVideo.recognition(videoFilePath, event)
+
+        return Response(videoRecognitionResult, mimetype='application/json')
+    except Exception as e:
+        logging.error(f"An error occurred: {e}", exc_info=True)
+        return jsonify({"error": f"An error occurred: {e}"}), 500   
+    
+
 setup_logging()
