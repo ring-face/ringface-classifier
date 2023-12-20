@@ -56,7 +56,7 @@ def recognition(personImageFile, dirStructure = DEFAULT_DIR_STUCTURE, clf = None
     face_locations = face_recognition.face_locations(image)
     no = len(face_locations)
     logging.debug(f"Number of faces detected: {no}")
-    encodings = face_recognition.face_encodings(image)
+    encodings = face_recognition.face_encodings(image, face_locations)
 
     # Predict all the faces in the test image using the trained classifier
     for i in range(no):

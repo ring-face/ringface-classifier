@@ -1,11 +1,13 @@
-from joblib import dump
+from io import BytesIO
 import time
 import logging
 import glob
 import os
-from joblib import load
 import json
 import numpy as np
+
+from . import gcs
+import joblib
 
 
 # """
@@ -14,8 +16,8 @@ import numpy as np
 # deprecated
 # """
 # def saveClassifier(clf, fitterData, classifierDir):
-#     clfFile = f"{classifierDir}/fitting.{fitterData.name}.dat"
-#     jsonFile = f"{classifierDir}/fitting.{fitterData.name}.json"
+#     clfFile = f"classifier/fitting.{fitterData.name}.dat"
+#     jsonFile = f"classifier/fitting.{fitterData.name}.json"
 
 #     logging.info(f"storing the fitted classifier to {jsonFile}")
 
@@ -34,7 +36,7 @@ Loads the latest *.dat file from the passed or standard classifier dir
 Returns a sklearn.svm.SVC instance
 """
 def loadLatestClassifier(classifierDir):
-    list_of_files = glob.glob(f"{classifierDir}/*.json")
+    list_of_files = glob.glob(f"classifier/*.json")
     if not list_of_files:
         logging.warning("no classifier found")
         return None, None
@@ -48,7 +50,7 @@ def loadLatestClassifier(classifierDir):
 
     clfDumpFile = fitClassifierData['fittedClassifierFile']
     logging.info(f"Loading the classifier from {clfDumpFile}")
-    clf = load(clfDumpFile)
+    clf = joblib.load(gcs.blob(clfDumpFile))
 
     return clf, fitClassifierData
 
@@ -69,16 +71,17 @@ def parseEncodingsAsNumpyArrays(fitClassifierData):
 Stores the passed classifier (clf) into a binary file
 Stores the passed data (fitterData) into a json
 """
-def saveClassifierWithRequest(clf, fitClassifierData, classifierDir):
+def saveClassifierWithRequest(clf, fitClassifierData):
     name = time.strftime("%Y%m%d-%H%M%S")
-    clfFile = f"{classifierDir}/fitting.{name}.dat"
-    jsonFilePath = f"{classifierDir}/fitting.{name}.json"
+    clfFile = f"classifier/fitting.{name}.dat"
+    jsonFilePath = f"classifier/fitting.{name}.json"
 
     logging.info(f"storing the fitted classifier to {jsonFilePath}")
 
-    dump(clf, clfFile) 
+    buffer = BytesIO()
+    joblib.dump(clf, buffer)
+    gcs.save_binary(buffer, clfFile)
 
     fitClassifierData['fittedClassifierFile'] = clfFile
 
-    with open(jsonFilePath, 'w') as outfile:
-        json.dump(fitClassifierData, outfile)
+    gcs.save_json_to_gcs(fitClassifierData, jsonFilePath)

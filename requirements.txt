@@ -3,7 +3,10 @@ sphinx
 numpy
 face-recognition
 joblib
-sklearn
+scikit-learn
 opencv-python
 flask
 python-decouple
+functions-framework==3.*
+google-cloud-storage
+

@@ -8,3 +8,7 @@ sample-data/dora-reka.mp4
 **/__pycache__/**
 gcloud/*tgz
 *.mp4
+sandbox
+
+.env
+.env.yaml

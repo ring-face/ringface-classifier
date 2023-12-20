@@ -74,7 +74,7 @@ def fitEncodings(imagesDir, classifierDir):
     return fitterData
 
 
-def fitClassifier(fitClassifierRequest, dirStructure):
+def fitClassifier(fitClassifierRequest):
     logging.info(f"fitClassifier : {fitClassifierRequest}")
 
     encodings = []
@@ -96,7 +96,7 @@ def fitClassifier(fitClassifierRequest, dirStructure):
     clf.fit(encodings,encodingLabels)
     logging.debug(f"fitting finished")
 
-    clfStorage.saveClassifierWithRequest(clf, fitClassifierRequest, dirStructure.classifierDir)
+    clfStorage.saveClassifierWithRequest(clf, fitClassifierRequest)
 
     return fitClassifierRequest, clf
 
